@@ -1,0 +1,1245 @@
+{
+  "name": "data.api.call",
+  "nodes": [
+    {
+      "parameters": {
+        "events": [
+          "call"
+        ],
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "tenant_id"
+            },
+            {
+              "name": "operation"
+            },
+            {
+              "name": "params"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2128,
+        4000
+      ],
+      "id": "065ad624-922d-462c-8140-dab226f3cbaa",
+      "name": "Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.sheets_doc_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "pizza_sizes",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -480,
+        4112
+      ],
+      "id": "c764b975-cee6-428f-ada5-379d13e4aeb2",
+      "name": "PIZZA Sizes Read",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PkdGdtRgBW07wRFW",
+          "name": "Google Sheets Meta Catalogo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst rows = $input.all().map(i => i.json).filter(r => r.code);\nconst sizes = rows.map(r => ({\n  code: String(r.code),\n  name: r.name || '',\n  base_price: Number(r.base_price) || 0\n}));\nreturn [{ json: { sizes, count: sizes.length } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        4112
+      ],
+      "id": "8b6c463d-2dc9-4755-b265-19a18ed5dc6c",
+      "name": "PIZZA Sizes Normalize"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.sheets_doc_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "pizza_flavors",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -480,
+        4416
+      ],
+      "id": "f6139cb3-99fa-4b23-9829-3022038b38f5",
+      "name": "PIZZA Flavors Read",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PkdGdtRgBW07wRFW",
+          "name": "Google Sheets Meta Catalogo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst rows = $input.all().map(i => i.json).filter(r => r.id);\nconst params = $('Prepare Context1').first().json.params || {};\nconst sizeCode = String(params.size_code || '').toLowerCase();\n\nconst colMap = {\n  'p': 'adicional_p',\n  'm': 'adicional_m',\n  'g': 'adicional_g',\n  'f': 'adicional_f'\n};\nconst col = colMap[sizeCode] || 'adicional_m';\n\nconst flavors = rows\n  .filter(r => String(r.ativo).toUpperCase() === 'TRUE' || r.ativo === true)\n  .map(r => ({\n    id: String(r.id),\n    name: r.name || '',\n    description: r.description || '',\n    adicional: Number(r[col]) || 0\n  }));\n\nreturn [{ json: { flavors, count: flavors.length, size_code: sizeCode } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        4416
+      ],
+      "id": "5c60d5bc-fac9-4d15-b911-30046ce409a7",
+      "name": "PIZZA Flavors Normalize"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.sheets_doc_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "pizza_borders",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -480,
+        4704
+      ],
+      "id": "805dba9a-c2c5-4580-bec5-95c0e06d50ae",
+      "name": "PIZZA Borders Read",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PkdGdtRgBW07wRFW",
+          "name": "Google Sheets Meta Catalogo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst rows = $input.all().map(i => i.json).filter(r => r.id !== undefined && r.id !== '');\nconst params = $('Prepare Context1').first().json.params || {};\nconst sizeCode = String(params.size_code || '').toLowerCase();\n\nconst colMap = {\n  'p': 'price_p',\n  'm': 'price_m',\n  'g': 'price_g',\n  'f': 'price_f'\n};\nconst col = colMap[sizeCode] || 'price_m';\n\nconst borders = rows\n  .filter(r => String(r.ativo).toUpperCase() === 'TRUE' || r.ativo === true)\n  .map(r => ({\n    id: String(r.id),\n    name: r.name || '',\n    price: Number(r[col]) || 0\n  }));\n\nreturn [{ json: { borders, count: borders.length, size_code: sizeCode } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -256,
+        4704
+      ],
+      "id": "d2f479f3-5ba3-4d23-b7f8-8bdaff3f0426",
+      "name": "PIZZA Borders Normalize"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1FrLFvKhZQpyniQa4qMKfsgLJyrKXMDjpBPK8xw_JVn8",
+          "mode": "list",
+          "cachedResultName": "N8N_Pizzaria",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FrLFvKhZQpyniQa4qMKfsgLJyrKXMDjpBPK8xw_JVn8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "tenants_config",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "tenant_id",
+              "lookupValue": "={{ $('Trigger').item.json.tenant_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1904,
+        4000
+      ],
+      "id": "4b83ab07-803a-4148-a19f-1410a54a09e5",
+      "name": "Load Tenant Config1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PkdGdtRgBW07wRFW",
+          "name": "Google Sheets Meta Catalogo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst trigger = $('Trigger').first().json;\nconst configRows = $('Load Tenant Config1').all();\n\nif (configRows.length === 0 || !configRows[0].json) {\n  throw new Error(`Tenant não encontrado: ${trigger.tenant_id}`);\n}\n\nconst cfg = configRows[0].json;\n\n// Garantir defaults razoáveis\nconst tenant = {\n  tenant_id: cfg.tenant_id || trigger.tenant_id,\n  display_name: cfg.display_name || '',\n  sheets_doc_id: cfg.sheets_doc_id || '',\n  clients_sheet: cfg.clients_sheet || 'Clients',\n  orderlist_sheet: cfg.orderlist_sheet || 'Order List',\n  catalog_sheet: cfg.catalog_sheet || 'Worksheet',\n  hours_sheet: cfg.hours_sheet || 'horario_funcionamento',\n  phone_number_id: cfg.phone_number_id || '',\n  catalog_id: cfg.catalog_id || '',\n  timezone_offset: Number(cfg.timezone_offset) || -3\n};\n\nreturn [{\n  json: {\n    tenant,\n    operation: trigger.operation,\n    params: trigger.params || {}\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1696,
+        4000
+      ],
+      "id": "01ab0a74-3ccf-431c-8344-73efcd1db86f",
+      "name": "Prepare Context1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f39f5a0c-6204-4380-a179-fad3a10914f0",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "client.get",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "client.get"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "480970b6-d85f-4a85-bd11-fcec276ff88c",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "client.save",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "client.save"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f24f2ea0-6c1f-429e-9282-07eb2ddc10ab",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "order.create",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "order.create"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "47c1da96-b7b2-4562-9423-1a78ade0738b",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "order.get_history",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "order.get_history"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0ec9fe36-6681-4c35-ae36-07bf67cd9703",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "catalog.get_items",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "catalog.get_items"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ccf3d780-7ded-4e0d-a6bb-e5a03f5b4b3e",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "catalog.is_open_now",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "catalog.is_open_now"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8ad62fde-62cf-4506-ab88-9f81997d6e46",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "pizza.get_sizes",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pizza.get_sizes"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c86ab290-9467-4f38-9182-a63bc5d5aedc",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "pizza.get_flavors",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pizza.get_flavors"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5f2449cb-5ee6-41e4-835e-b7ab25a114ca",
+                    "leftValue": "={{ $json.operation }}",
+                    "rightValue": "pizza.get_borders",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pizza.get_borders"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "unknown"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1456,
+        3872
+      ],
+      "id": "973bfc25-4d24-4ac0-8484-5ceb79a757bc",
+      "name": "Operation Switch1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.sheets_doc_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.clients_sheet }}",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Phone Number",
+              "lookupValue": "={{ $('Prepare Context1').item.json.params.phone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1232,
+        3072
+      ],
+      "id": "b09c9336-a35e-4616-a107-e0233f8a7c73",
+      "name": "GET Read Clients1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PkdGdtRgBW07wRFW",
+          "name": "Google Sheets Meta Catalogo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst items = $input.all();\nconst params = $('Prepare Context1').first().json.params;\nconst phone = params.phone || '';\n\nlet exists = false, customer_name = '', street = '', district = '', zip_ = '', last_state = '', contexto = {};\n\nif (items.length > 0 && items[0].json && items[0].json['Phone Number']) {\n  const row = items[0].json;\n  exists = true;\n  customer_name = row['User Name'] || '';\n  street = row['Address'] || '';\n  district = row['District'] || '';\n  zip_ = row['Zip'] || '';\n  last_state = row['Last State'] || '';\n  try { contexto = row['Contexto'] ? JSON.parse(row['Contexto']) : {}; }\n  catch(e) { contexto = {}; }\n}\n\nconst has_full_address = Boolean(street && district && zip_);\n\nreturn [{\n  json: {\n    exists,\n    customer_phone: phone,\n    customer_name,\n    street, district, zip: zip_,\n    has_full_address,\n    last_state, contexto\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1008,
+        3072
+      ],
+      "id": "30c12ff9-db65-41be-baf4-d9b61f4dd4c3",
+      "name": "GET Normalize Client1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.sheets_doc_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.clients_sheet }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Phone Number": "={{ $('Prepare Context1').item.json.params.phone }}",
+            "User Name": "={{ $('Prepare Context1').item.json.params.name || '' }}",
+            "Address": "={{ $('Prepare Context1').item.json.params.street || '' }}",
+            "District": "={{ $('Prepare Context1').item.json.params.district || '' }}",
+            "Zip": "={{ $('Prepare Context1').item.json.params.zip || '' }}",
+            "Last State": "={{ $('Prepare Context1').item.json.params.last_state || '' }}",
+            "Contexto": "={{ $('Prepare Context1').item.json.params.contexto || '{}' }}"
+          },
+          "matchingColumns": [
+            "Phone Number"
+          ],
+          "schema": [
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "User Name",
+              "displayName": "User Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "District",
+              "displayName": "District",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Zip",
+              "displayName": "Zip",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Last State",
+              "displayName": "Last State",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Contexto",
+              "displayName": "Contexto",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1232,
+        3376
+      ],
+      "id": "40c1a2ac-7e74-468b-8b88-ef7dfddf6558",
+      "name": "SAVE Upsert Client1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PkdGdtRgBW07wRFW",
+          "name": "Google Sheets Meta Catalogo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { success: true } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1008,
+        3376
+      ],
+      "id": "c3528646-c51d-4869-861f-ab73dbb253ca",
+      "name": "SAVE Client Output1"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst ctx = $('Prepare Context1').first().json;\nconst params = ctx.params || {};\n\n// Generate order ID\nconst ts = Date.now();\nconst rand = Math.floor(Math.random() * 10000).toString().padStart(4, '0');\nconst orderId = `ORD-${ts}-${rand}`;\n\n// Date in tenant timezone\nconst tzOffset = Number(ctx.tenant.timezone_offset) || -3;\nconst now = new Date();\nconst localMs = now.getTime() + tzOffset * 3600 * 1000;\nconst local = new Date(localMs);\nconst yyyy = local.getUTCFullYear();\nconst mm = String(local.getUTCMonth() + 1).padStart(2, '0');\nconst dd = String(local.getUTCDate()).padStart(2, '0');\nconst hh = String(local.getUTCHours()).padStart(2, '0');\nconst mi = String(local.getUTCMinutes()).padStart(2, '0');\nconst dateStr = `${yyyy}-${mm}-${dd} ${hh}:${mi}`;\n\nconst items = params.items || [];\nconst cutleryStr = params.cutlery ? 'Sim' : 'Não';\n\nconst rows = items.map(it => ({\n  'Date': dateStr,\n  'Order ID': orderId,\n  'Phone Number': params.customer_phone || '',\n  'User': params.customer_name || '',\n  'Item_id': String(it.product_id || ''),\n  'Item': it.product_name || '',\n  'Quantity': String(it.quantity || 1),\n  'Price': String(it.unit_price || 0),\n  'Status': 'pending_payment',\n  'Address': params.delivery_address || '',\n  'Observation': params.observation || '',\n  'Cutlery': cutleryStr,\n  'Payment Method': params.payment_method || '',\n  'Change For': String(params.change_for || '')\n}));\n\nreturn rows.map(r => ({ json: { ...r, _order_id: orderId } }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1232,
+        3680
+      ],
+      "id": "88ccc68d-5a37-4ecd-8abc-b16fffdc82b3",
+      "name": "ORDER Prepare Rows1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.sheets_doc_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.orderlist_sheet }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $json['Date'] }}",
+            "Order ID": "={{ $json['Order ID'] }}",
+            "Phone Number": "={{ $json['Phone Number'] }}",
+            "User": "={{ $json['User'] }}",
+            "Item_id": "={{ $json['Item_id'] }}",
+            "Item": "={{ $json['Item'] }}",
+            "Quantity": "={{ $json['Quantity'] }}",
+            "Price": "={{ $json['Price'] }}",
+            "Status": "={{ $json['Status'] }}",
+            "Address": "={{ $json['Address'] }}",
+            "Observation": "={{ $json['Observation'] }}",
+            "Cutlery": "={{ $json['Cutlery'] }}",
+            "Payment Method": "={{ $json['Payment Method'] }}",
+            "Change For": "={{ $json['Change For'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Order ID",
+              "displayName": "Order ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Phone Number",
+              "displayName": "Phone Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "User",
+              "displayName": "User",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Item_id",
+              "displayName": "Item_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Item",
+              "displayName": "Item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Quantity",
+              "displayName": "Quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Address",
+              "displayName": "Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Observation",
+              "displayName": "Observation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cutlery",
+              "displayName": "Cutlery",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Payment Method",
+              "displayName": "Payment Method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Change For",
+              "displayName": "Change For",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1008,
+        3680
+      ],
+      "id": "f9957c42-dc7d-4d3d-8550-269523d0e4d1",
+      "name": "ORDER Append Rows1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PkdGdtRgBW07wRFW",
+          "name": "Google Sheets Meta Catalogo"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        3680
+      ],
+      "id": "b090173a-c858-4241-ad3e-8cd7b3a7331c",
+      "name": "ORDER Limit "
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst orderId = $('ORDER Prepare Rows1').first().json._order_id;\nreturn [{ json: { order_id: orderId, success: true } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        3680
+      ],
+      "id": "f39dfe15-e141-4306-a2aa-fdb705e22d0c",
+      "name": "ORDER Create Output1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.sheets_doc_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.orderlist_sheet }}",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Phone Number",
+              "lookupValue": "={{ $('Prepare Context1').item.json.params.phone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1232,
+        3984
+      ],
+      "id": "e4ba4f01-0e58-4b31-9736-73f9aaace8dd",
+      "name": "HISTORY Read Orders1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PkdGdtRgBW07wRFW",
+          "name": "Google Sheets Meta Catalogo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst rows = $input.all().map(i => i.json).filter(r => r['Order ID']);\nconst params = $('Prepare Context1').first().json.params || {};\nconst limit = Number(params.limit) || 5;\n\nif (rows.length === 0) {\n  return [{ json: { orders: [], count: 0 } }];\n}\n\nconst grouped = {};\nfor (const r of rows) {\n  const id = String(r['Order ID']);\n  if (!grouped[id]) {\n    grouped[id] = {\n      order_id: id,\n      created_at: r['Date'] || '',\n      customer_phone: r['Phone Number'] || '',\n      customer_name: r['User'] || '',\n      delivery_address: r['Address'] || '',\n      status: r['Status'] || '',\n      observation: r['Observation'] || '',\n      cutlery: (r['Cutlery'] === 'Sim'),\n      payment_method: r['Payment Method'] || '',\n      change_for: Number(r['Change For']) || 0,\n      items: [],\n      total: 0\n    };\n  }\n  const qty = Number(r['Quantity']) || 0;\n  const price = Number(r['Price']) || 0;\n  grouped[id].items.push({\n    product_id: r['Item_id'] || '',\n    product_name: r['Item'] || '',\n    quantity: qty,\n    unit_price: price,\n    line_total: qty * price\n  });\n  grouped[id].total += qty * price;\n}\n\nconst list = Object.values(grouped)\n  .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))\n  .slice(0, limit);\n\nreturn [{ json: { orders: list, count: list.length } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1008,
+        3984
+      ],
+      "id": "cb925201-dcb4-4c7c-beac-1a2474834f5b",
+      "name": "HISTORY Aggregate1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.sheets_doc_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.catalog_sheet }}",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1232,
+        4272
+      ],
+      "id": "6a643520-bd17-4a9e-8515-5a28647df3db",
+      "name": "CATALOG Read1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PkdGdtRgBW07wRFW",
+          "name": "Google Sheets Meta Catalogo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst rows = $input.all().map(i => i.json).filter(r => r.id);\nconst params = $('Prepare Context1').first().json.params || {};\nconst requestedIds = params.product_ids || [];\nconst filterById = requestedIds.length > 0;\nconst idsSet = new Set(requestedIds.map(x => String(x)));\n\nconst items = rows\n  .filter(r => !filterById || idsSet.has(String(r.id)))\n  .map(r => ({\n    product_id: String(r.id),\n    name: r.title || '',\n    description: r.description || '',\n    price: Number(r.price) || 0,\n    available: String(r.availability).toLowerCase() === 'in stock',\n    image_link: r.image_link || ''\n  }));\n\nreturn [{ json: { items, count: items.length } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1008,
+        4272
+      ],
+      "id": "b01c6b2d-78de-45d2-90ba-fb41a99cf5fb",
+      "name": "CATALOG Normalize1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.sheets_doc_id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Prepare Context1').item.json.tenant.hours_sheet }}",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1232,
+        4576
+      ],
+      "id": "fe025dd7-c14d-4b97-a030-c284db44384d",
+      "name": "HOURS Read1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PkdGdtRgBW07wRFW",
+          "name": "Google Sheets Meta Catalogo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst rows = $input.all().map(i => i.json).filter(r => r.dia_semana !== undefined && r.dia_semana !== '');\nconst ctx = $('Prepare Context1').first().json;\nconst tzOffset = Number(ctx.tenant.timezone_offset) || -3;\n\nconst now = new Date();\nconst localMs = now.getTime() + tzOffset * 3600 * 1000;\nconst local = new Date(localMs);\nconst dow = local.getUTCDay();\nconst hh = local.getUTCHours();\nconst mm = local.getUTCMinutes();\nconst nowMin = hh * 60 + mm;\n\nconst todayBlocks = rows.filter(r => Number(r.dia_semana) === dow);\n\nfunction parseHM(hm) {\n  const [h, m] = String(hm).split(':').map(Number);\n  return h * 60 + (m || 0);\n}\n\nlet isOpen = false;\nfor (const b of todayBlocks) {\n  if (nowMin >= parseHM(b.hora_inicio) && nowMin < parseHM(b.hora_fim)) {\n    isOpen = true;\n    break;\n  }\n}\n\nlet nextOpenMsg = '';\nif (!isOpen) {\n  const dowNames = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];\n  const remainingToday = todayBlocks\n    .filter(b => parseHM(b.hora_inicio) > nowMin)\n    .sort((a, b) => parseHM(a.hora_inicio) - parseHM(b.hora_inicio));\n\n  if (remainingToday.length > 0) {\n    nextOpenMsg = `Hoje abrimos às ${remainingToday[0].hora_inicio}.`;\n  } else {\n    for (let i = 1; i <= 7; i++) {\n      const td = (dow + i) % 7;\n      const blocks = rows.filter(r => Number(r.dia_semana) === td)\n        .sort((a, b) => parseHM(a.hora_inicio) - parseHM(b.hora_inicio));\n      if (blocks.length > 0) {\n        nextOpenMsg = `Abrimos ${dowNames[td]} às ${blocks[0].hora_inicio}.`;\n        break;\n      }\n    }\n    if (!nextOpenMsg) nextOpenMsg = 'Consulte nossos horários.';\n  }\n}\n\nreturn [{ json: { is_open: isOpen, next_open_msg: nextOpenMsg } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1008,
+        4576
+      ],
+      "id": "c80c6a5c-2b4c-40d0-9123-fcfa6e0d481b",
+      "name": "HOURS Check1"
+    },
+    {
+      "parameters": {
+        "content": "## Pizzaria",
+        "height": 2336,
+        "width": 3232,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2368,
+        2880
+      ],
+      "typeVersion": 1,
+      "id": "d8818691-401c-42f0-bb98-0ef677f57a54",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Trigger": {
+      "main": [
+        [
+          {
+            "node": "Load Tenant Config1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PIZZA Sizes Read": {
+      "main": [
+        [
+          {
+            "node": "PIZZA Sizes Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PIZZA Flavors Read": {
+      "main": [
+        [
+          {
+            "node": "PIZZA Flavors Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PIZZA Borders Read": {
+      "main": [
+        [
+          {
+            "node": "PIZZA Borders Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Tenant Config1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Context1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Context1": {
+      "main": [
+        [
+          {
+            "node": "Operation Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Operation Switch1": {
+      "main": [
+        [
+          {
+            "node": "GET Read Clients1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "SAVE Upsert Client1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ORDER Prepare Rows1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HISTORY Read Orders1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "CATALOG Read1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HOURS Read1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PIZZA Sizes Read",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PIZZA Flavors Read",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "PIZZA Borders Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Read Clients1": {
+      "main": [
+        [
+          {
+            "node": "GET Normalize Client1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SAVE Upsert Client1": {
+      "main": [
+        [
+          {
+            "node": "SAVE Client Output1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ORDER Prepare Rows1": {
+      "main": [
+        [
+          {
+            "node": "ORDER Append Rows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ORDER Append Rows1": {
+      "main": [
+        [
+          {
+            "node": "ORDER Limit ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ORDER Limit ": {
+      "main": [
+        [
+          {
+            "node": "ORDER Create Output1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HISTORY Read Orders1": {
+      "main": [
+        [
+          {
+            "node": "HISTORY Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CATALOG Read1": {
+      "main": [
+        [
+          {
+            "node": "CATALOG Normalize1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HOURS Read1": {
+      "main": [
+        [
+          {
+            "node": "HOURS Check1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "65bcf5b9-1376-4d23-922d-ed16ef410bbc",
+  "meta": {
+    "instanceId": "bf9c0705358f3424eb1d41219c56e9c5f5a259e2443c6a07b72a86e802497145"
+  },
+  "id": "sSAivZw3ykxvcYyy",
+  "tags": []
+}
