@@ -1,0 +1,441 @@
+{
+  "data_api_version": "3.0",
+  "version": "7.3",
+  "routing_model": {
+    "CARDAPIO": ["CARRINHO"],
+    "CARRINHO": ["OPCOES"],
+    "OPCOES": ["RESUMO"],
+    "RESUMO": ["FINALIZAR"],
+    "FINALIZAR": []
+  },
+  "screens": [
+    {
+      "id": "CARDAPIO",
+      "title": "Cardápio",
+      "data": {
+        "flow_token": { "type": "string", "__example__": "ft_abc123" },
+        "has_items": { "type": "boolean", "__example__": false },
+        "cat_1_name": { "type": "string", "__example__": "Sugestoes do Dia" },
+        "cat_1_items": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" }, "image": { "type": "string" } } },
+          "__example__": [{ "id": "1", "title": "Salmao Belle Meuniere", "description": "R$ 179,90 - Arroz brocolis e batatas", "image": "" }]
+        },
+        "cat_1_visible": { "type": "boolean", "__example__": true },
+        "cat_2_name": { "type": "string", "__example__": "" },
+        "cat_2_items": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" }, "image": { "type": "string" } } },
+          "__example__": []
+        },
+        "cat_2_visible": { "type": "boolean", "__example__": false },
+        "cat_3_name": { "type": "string", "__example__": "" },
+        "cat_3_items": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" }, "image": { "type": "string" } } },
+          "__example__": []
+        },
+        "cat_3_visible": { "type": "boolean", "__example__": false },
+        "cat_4_name": { "type": "string", "__example__": "" },
+        "cat_4_items": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" }, "image": { "type": "string" } } },
+          "__example__": []
+        },
+        "cat_4_visible": { "type": "boolean", "__example__": false },
+        "cat_5_name": { "type": "string", "__example__": "" },
+        "cat_5_items": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" }, "image": { "type": "string" } } },
+          "__example__": []
+        },
+        "cat_5_visible": { "type": "boolean", "__example__": false },
+        "cat_6_name": { "type": "string", "__example__": "" },
+        "cat_6_items": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" }, "image": { "type": "string" } } },
+          "__example__": []
+        },
+        "cat_6_visible": { "type": "boolean", "__example__": false },
+        "cat_7_name": { "type": "string", "__example__": "" },
+        "cat_7_items": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" }, "image": { "type": "string" } } },
+          "__example__": []
+        },
+        "cat_7_visible": { "type": "boolean", "__example__": false },
+        "cat_8_name": { "type": "string", "__example__": "" },
+        "cat_8_items": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" }, "image": { "type": "string" } } },
+          "__example__": []
+        },
+        "cat_8_visible": { "type": "boolean", "__example__": false },
+        "cat_9_name": { "type": "string", "__example__": "" },
+        "cat_9_items": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" }, "image": { "type": "string" } } },
+          "__example__": []
+        },
+        "cat_9_visible": { "type": "boolean", "__example__": false },
+        "cat_10_name": { "type": "string", "__example__": "" },
+        "cat_10_items": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" }, "description": { "type": "string" }, "image": { "type": "string" } } },
+          "__example__": []
+        },
+        "cat_10_visible": { "type": "boolean", "__example__": false }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextHeading", "text": "Cardapio" },
+          { "type": "TextCaption", "text": "Selecione os itens e toque em Ver Carrinho." },
+          {
+            "type": "CheckboxGroup", "name": "cat_1", "label": "${data.cat_1_name}",
+            "data-source": "${data.cat_1_items}", "visible": "${data.cat_1_visible}", "required": false,
+            "on-select-action": { "name": "update_data", "payload": { "has_items": true } }
+          },
+          {
+            "type": "CheckboxGroup", "name": "cat_2", "label": "${data.cat_2_name}",
+            "data-source": "${data.cat_2_items}", "visible": "${data.cat_2_visible}", "required": false,
+            "on-select-action": { "name": "update_data", "payload": { "has_items": true } }
+          },
+          {
+            "type": "CheckboxGroup", "name": "cat_3", "label": "${data.cat_3_name}",
+            "data-source": "${data.cat_3_items}", "visible": "${data.cat_3_visible}", "required": false,
+            "on-select-action": { "name": "update_data", "payload": { "has_items": true } }
+          },
+          {
+            "type": "CheckboxGroup", "name": "cat_4", "label": "${data.cat_4_name}",
+            "data-source": "${data.cat_4_items}", "visible": "${data.cat_4_visible}", "required": false,
+            "on-select-action": { "name": "update_data", "payload": { "has_items": true } }
+          },
+          {
+            "type": "CheckboxGroup", "name": "cat_5", "label": "${data.cat_5_name}",
+            "data-source": "${data.cat_5_items}", "visible": "${data.cat_5_visible}", "required": false,
+            "on-select-action": { "name": "update_data", "payload": { "has_items": true } }
+          },
+          {
+            "type": "CheckboxGroup", "name": "cat_6", "label": "${data.cat_6_name}",
+            "data-source": "${data.cat_6_items}", "visible": "${data.cat_6_visible}", "required": false,
+            "on-select-action": { "name": "update_data", "payload": { "has_items": true } }
+          },
+          {
+            "type": "CheckboxGroup", "name": "cat_7", "label": "${data.cat_7_name}",
+            "data-source": "${data.cat_7_items}", "visible": "${data.cat_7_visible}", "required": false,
+            "on-select-action": { "name": "update_data", "payload": { "has_items": true } }
+          },
+          {
+            "type": "CheckboxGroup", "name": "cat_8", "label": "${data.cat_8_name}",
+            "data-source": "${data.cat_8_items}", "visible": "${data.cat_8_visible}", "required": false,
+            "on-select-action": { "name": "update_data", "payload": { "has_items": true } }
+          },
+          {
+            "type": "CheckboxGroup", "name": "cat_9", "label": "${data.cat_9_name}",
+            "data-source": "${data.cat_9_items}", "visible": "${data.cat_9_visible}", "required": false,
+            "on-select-action": { "name": "update_data", "payload": { "has_items": true } }
+          },
+          {
+            "type": "CheckboxGroup", "name": "cat_10", "label": "${data.cat_10_name}",
+            "data-source": "${data.cat_10_items}", "visible": "${data.cat_10_visible}", "required": false,
+            "on-select-action": { "name": "update_data", "payload": { "has_items": true } }
+          },
+          {
+            "type": "Footer",
+            "label": "Ver Carrinho",
+            "enabled": "${data.has_items}",
+            "on-click-action": {
+              "name": "data_exchange",
+              "payload": {
+                "flow_token": "${data.flow_token}"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "CARRINHO",
+      "title": "Seu Carrinho",
+      "data": {
+        "flow_token": { "type": "string", "__example__": "ft_abc123" },
+        "qty_options": {
+          "type": "array",
+          "items": { "type": "object", "properties": { "id": { "type": "string" }, "title": { "type": "string" } } },
+          "__example__": [{ "id": "1", "title": "1" }]
+        },
+        "item_1_id": { "type": "string", "__example__": "1" },
+        "item_1_name": { "type": "string", "__example__": "Salmao Belle Meuniere - R$179,90" },
+        "item_1_visible": { "type": "boolean", "__example__": true },
+        "item_2_id": { "type": "string", "__example__": "" },
+        "item_2_name": { "type": "string", "__example__": "" },
+        "item_2_visible": { "type": "boolean", "__example__": false },
+        "item_3_id": { "type": "string", "__example__": "" },
+        "item_3_name": { "type": "string", "__example__": "" },
+        "item_3_visible": { "type": "boolean", "__example__": false },
+        "item_4_id": { "type": "string", "__example__": "" },
+        "item_4_name": { "type": "string", "__example__": "" },
+        "item_4_visible": { "type": "boolean", "__example__": false },
+        "item_5_id": { "type": "string", "__example__": "" },
+        "item_5_name": { "type": "string", "__example__": "" },
+        "item_5_visible": { "type": "boolean", "__example__": false },
+        "item_6_id": { "type": "string", "__example__": "" },
+        "item_6_name": { "type": "string", "__example__": "" },
+        "item_6_visible": { "type": "boolean", "__example__": false },
+        "item_7_id": { "type": "string", "__example__": "" },
+        "item_7_name": { "type": "string", "__example__": "" },
+        "item_7_visible": { "type": "boolean", "__example__": false },
+        "item_8_id": { "type": "string", "__example__": "" },
+        "item_8_name": { "type": "string", "__example__": "" },
+        "item_8_visible": { "type": "boolean", "__example__": false },
+        "item_9_id": { "type": "string", "__example__": "" },
+        "item_9_name": { "type": "string", "__example__": "" },
+        "item_9_visible": { "type": "boolean", "__example__": false },
+        "item_10_id": { "type": "string", "__example__": "" },
+        "item_10_name": { "type": "string", "__example__": "" },
+        "item_10_visible": { "type": "boolean", "__example__": false }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextHeading", "text": "Carrinho" },
+          { "type": "TextCaption", "text": "Ajuste as quantidades dos itens selecionados." },
+          { "type": "TextBody", "text": "${data.item_1_name}", "visible": "${data.item_1_visible}" },
+          { "type": "Dropdown", "name": "qty_1", "label": "Qtd", "visible": "${data.item_1_visible}", "required": true, "init-value": "1", "data-source": "${data.qty_options}" },
+          { "type": "TextBody", "text": "${data.item_2_name}", "visible": "${data.item_2_visible}" },
+          { "type": "Dropdown", "name": "qty_2", "label": "Qtd", "visible": "${data.item_2_visible}", "required": true, "init-value": "1", "data-source": "${data.qty_options}" },
+          { "type": "TextBody", "text": "${data.item_3_name}", "visible": "${data.item_3_visible}" },
+          { "type": "Dropdown", "name": "qty_3", "label": "Qtd", "visible": "${data.item_3_visible}", "required": true, "init-value": "1", "data-source": "${data.qty_options}" },
+          { "type": "TextBody", "text": "${data.item_4_name}", "visible": "${data.item_4_visible}" },
+          { "type": "Dropdown", "name": "qty_4", "label": "Qtd", "visible": "${data.item_4_visible}", "required": true, "init-value": "1", "data-source": "${data.qty_options}" },
+          { "type": "TextBody", "text": "${data.item_5_name}", "visible": "${data.item_5_visible}" },
+          { "type": "Dropdown", "name": "qty_5", "label": "Qtd", "visible": "${data.item_5_visible}", "required": true, "init-value": "1", "data-source": "${data.qty_options}" },
+          { "type": "TextBody", "text": "${data.item_6_name}", "visible": "${data.item_6_visible}" },
+          { "type": "Dropdown", "name": "qty_6", "label": "Qtd", "visible": "${data.item_6_visible}", "required": true, "init-value": "1", "data-source": "${data.qty_options}" },
+          { "type": "TextBody", "text": "${data.item_7_name}", "visible": "${data.item_7_visible}" },
+          { "type": "Dropdown", "name": "qty_7", "label": "Qtd", "visible": "${data.item_7_visible}", "required": true, "init-value": "1", "data-source": "${data.qty_options}" },
+          { "type": "TextBody", "text": "${data.item_8_name}", "visible": "${data.item_8_visible}" },
+          { "type": "Dropdown", "name": "qty_8", "label": "Qtd", "visible": "${data.item_8_visible}", "required": true, "init-value": "1", "data-source": "${data.qty_options}" },
+          { "type": "TextBody", "text": "${data.item_9_name}", "visible": "${data.item_9_visible}" },
+          { "type": "Dropdown", "name": "qty_9", "label": "Qtd", "visible": "${data.item_9_visible}", "required": true, "init-value": "1", "data-source": "${data.qty_options}" },
+          { "type": "TextBody", "text": "${data.item_10_name}", "visible": "${data.item_10_visible}" },
+          { "type": "Dropdown", "name": "qty_10", "label": "Qtd", "visible": "${data.item_10_visible}", "required": true, "init-value": "1", "data-source": "${data.qty_options}" },
+          {
+            "type": "Footer",
+            "label": "Continuar →",
+            "on-click-action": {
+              "name": "navigate",
+              "next": { "type": "screen", "name": "OPCOES" },
+              "payload": {
+                "flow_token": "${data.flow_token}",
+                "item_1_id": "${data.item_1_id}", "item_2_id": "${data.item_2_id}", "item_3_id": "${data.item_3_id}", "item_4_id": "${data.item_4_id}", "item_5_id": "${data.item_5_id}",
+                "item_6_id": "${data.item_6_id}", "item_7_id": "${data.item_7_id}", "item_8_id": "${data.item_8_id}", "item_9_id": "${data.item_9_id}", "item_10_id": "${data.item_10_id}",
+                "qty_1": "${form.qty_1}", "qty_2": "${form.qty_2}", "qty_3": "${form.qty_3}", "qty_4": "${form.qty_4}", "qty_5": "${form.qty_5}",
+                "qty_6": "${form.qty_6}", "qty_7": "${form.qty_7}", "qty_8": "${form.qty_8}", "qty_9": "${form.qty_9}", "qty_10": "${form.qty_10}"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "OPCOES",
+      "title": "Opções do Pedido",
+      "data": {
+        "flow_token": { "type": "string", "__example__": "ft_abc123" },
+        "item_1_id": { "type": "string", "__example__": "" }, "item_2_id": { "type": "string", "__example__": "" }, "item_3_id": { "type": "string", "__example__": "" }, "item_4_id": { "type": "string", "__example__": "" }, "item_5_id": { "type": "string", "__example__": "" },
+        "item_6_id": { "type": "string", "__example__": "" }, "item_7_id": { "type": "string", "__example__": "" }, "item_8_id": { "type": "string", "__example__": "" }, "item_9_id": { "type": "string", "__example__": "" }, "item_10_id": { "type": "string", "__example__": "" },
+        "qty_1": { "type": "string", "__example__": "1" }, "qty_2": { "type": "string", "__example__": "0" }, "qty_3": { "type": "string", "__example__": "0" }, "qty_4": { "type": "string", "__example__": "0" }, "qty_5": { "type": "string", "__example__": "0" },
+        "qty_6": { "type": "string", "__example__": "0" }, "qty_7": { "type": "string", "__example__": "0" }, "qty_8": { "type": "string", "__example__": "0" }, "qty_9": { "type": "string", "__example__": "0" }, "qty_10": { "type": "string", "__example__": "0" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextHeading", "text": "Opções" },
+          { "type": "TextCaption", "text": "Adicione observações e preferências ao pedido." },
+          {
+            "type": "Dropdown", "name": "talheres", "label": "Talheres", "required": true,
+            "data-source": [
+              { "id": "sim", "title": "Sim, enviar" },
+              { "id": "nao", "title": "Não preciso" }
+            ]
+          },
+          {
+            "type": "TextArea", "name": "observacao", "label": "Observação", "required": false,
+            "helper-text": "Ex: sem cebola, bem passado, alergia..."
+          },
+          {
+            "type": "Footer",
+            "label": "Ver Resumo →",
+            "on-click-action": {
+              "name": "navigate",
+              "next": { "type": "screen", "name": "RESUMO" },
+              "payload": {
+                "flow_token": "${data.flow_token}",
+                "item_1_id": "${data.item_1_id}", "item_2_id": "${data.item_2_id}", "item_3_id": "${data.item_3_id}", "item_4_id": "${data.item_4_id}", "item_5_id": "${data.item_5_id}",
+                "item_6_id": "${data.item_6_id}", "item_7_id": "${data.item_7_id}", "item_8_id": "${data.item_8_id}", "item_9_id": "${data.item_9_id}", "item_10_id": "${data.item_10_id}",
+                "qty_1": "${data.qty_1}", "qty_2": "${data.qty_2}", "qty_3": "${data.qty_3}", "qty_4": "${data.qty_4}", "qty_5": "${data.qty_5}",
+                "qty_6": "${data.qty_6}", "qty_7": "${data.qty_7}", "qty_8": "${data.qty_8}", "qty_9": "${data.qty_9}", "qty_10": "${data.qty_10}",
+                "observacao": "${form.observacao}",
+                "talheres": "${form.talheres}"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "RESUMO",
+      "title": "Resumo do Pedido",
+      "data": {
+        "flow_token": { "type": "string", "__example__": "ft_abc123" },
+        "item_1_id": { "type": "string", "__example__": "" }, "item_2_id": { "type": "string", "__example__": "" }, "item_3_id": { "type": "string", "__example__": "" }, "item_4_id": { "type": "string", "__example__": "" }, "item_5_id": { "type": "string", "__example__": "" },
+        "item_6_id": { "type": "string", "__example__": "" }, "item_7_id": { "type": "string", "__example__": "" }, "item_8_id": { "type": "string", "__example__": "" }, "item_9_id": { "type": "string", "__example__": "" }, "item_10_id": { "type": "string", "__example__": "" },
+        "qty_1": { "type": "string", "__example__": "1" }, "qty_2": { "type": "string", "__example__": "0" }, "qty_3": { "type": "string", "__example__": "0" }, "qty_4": { "type": "string", "__example__": "0" }, "qty_5": { "type": "string", "__example__": "0" },
+        "qty_6": { "type": "string", "__example__": "0" }, "qty_7": { "type": "string", "__example__": "0" }, "qty_8": { "type": "string", "__example__": "0" }, "qty_9": { "type": "string", "__example__": "0" }, "qty_10": { "type": "string", "__example__": "0" },
+        "observacao": { "type": "string", "__example__": "" },
+        "talheres": { "type": "string", "__example__": "sim" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextHeading", "text": "Resumo do Pedido" },
+          { "type": "TextCaption", "text": "Confira os itens selecionados antes de continuar." },
+          { "type": "TextBody", "text": "Seus itens e quantidades foram registrados. Na próxima tela, preencha os dados de entrega e pagamento." },
+          { "type": "TextCaption", "text": "Após confirmar, você receberá o detalhamento completo com valores por mensagem." },
+          {
+            "type": "Footer",
+            "label": "Preencher Dados de Entrega →",
+            "on-click-action": {
+              "name": "navigate",
+              "next": { "type": "screen", "name": "FINALIZAR" },
+              "payload": {
+                "flow_token": "${data.flow_token}",
+                "item_1_id": "${data.item_1_id}", "item_2_id": "${data.item_2_id}", "item_3_id": "${data.item_3_id}", "item_4_id": "${data.item_4_id}", "item_5_id": "${data.item_5_id}",
+                "item_6_id": "${data.item_6_id}", "item_7_id": "${data.item_7_id}", "item_8_id": "${data.item_8_id}", "item_9_id": "${data.item_9_id}", "item_10_id": "${data.item_10_id}",
+                "qty_1": "${data.qty_1}", "qty_2": "${data.qty_2}", "qty_3": "${data.qty_3}", "qty_4": "${data.qty_4}", "qty_5": "${data.qty_5}",
+                "qty_6": "${data.qty_6}", "qty_7": "${data.qty_7}", "qty_8": "${data.qty_8}", "qty_9": "${data.qty_9}", "qty_10": "${data.qty_10}",
+                "observacao": "${data.observacao}",
+                "talheres": "${data.talheres}"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "FINALIZAR",
+      "title": "Finalizar Pedido",
+      "terminal": true,
+      "data": {
+        "flow_token": { "type": "string", "__example__": "ft_abc123" },
+        "item_1_id": { "type": "string", "__example__": "" }, "item_2_id": { "type": "string", "__example__": "" }, "item_3_id": { "type": "string", "__example__": "" }, "item_4_id": { "type": "string", "__example__": "" }, "item_5_id": { "type": "string", "__example__": "" },
+        "item_6_id": { "type": "string", "__example__": "" }, "item_7_id": { "type": "string", "__example__": "" }, "item_8_id": { "type": "string", "__example__": "" }, "item_9_id": { "type": "string", "__example__": "" }, "item_10_id": { "type": "string", "__example__": "" },
+        "qty_1": { "type": "string", "__example__": "1" }, "qty_2": { "type": "string", "__example__": "0" }, "qty_3": { "type": "string", "__example__": "0" }, "qty_4": { "type": "string", "__example__": "0" }, "qty_5": { "type": "string", "__example__": "0" },
+        "qty_6": { "type": "string", "__example__": "0" }, "qty_7": { "type": "string", "__example__": "0" }, "qty_8": { "type": "string", "__example__": "0" }, "qty_9": { "type": "string", "__example__": "0" }, "qty_10": { "type": "string", "__example__": "0" },
+        "observacao": { "type": "string", "__example__": "" },
+        "talheres": { "type": "string", "__example__": "sim" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextHeading", "text": "Dados de Entrega" },
+          { "type": "TextCaption", "text": "Preencha os dados para entrega do seu pedido." },
+          {
+            "type": "TextInput", "name": "cep", "label": "CEP", "input-type": "text",
+            "required": true, "min-chars": 8, "max-chars": 8, "helper-text": "8 dígitos, somente números"
+          },
+          { "type": "TextInput", "name": "endereco", "label": "Endereço", "input-type": "text", "required": true },
+          { "type": "TextInput", "name": "numero", "label": "Nº", "input-type": "text", "required": true },
+          { "type": "TextInput", "name": "complemento", "label": "Complemento", "input-type": "text", "required": false, "helper-text": "Apto, bloco, sala..." },
+          { "type": "TextInput", "name": "referencia", "label": "Referência", "input-type": "text", "required": false },
+          {
+            "type": "RadioButtonsGroup", "name": "tipo_pagamento", "label": "Tipo de pagamento", "required": true,
+            "data-source": [
+              { "id": "entrega", "title": "Pagamento na Entrega" },
+              { "id": "online", "title": "Pagamento Online" }
+            ]
+          },
+          {
+            "type": "If",
+            "condition": "${form.tipo_pagamento} == 'entrega'",
+            "then": [
+              {
+                "type": "Dropdown", "name": "pagamento_entrega", "label": "Forma de pagamento", "required": true,
+                "data-source": [
+                  { "id": "dinheiro", "title": "Dinheiro" },
+                  { "id": "credito", "title": "Cartão de Crédito" },
+                  { "id": "debito", "title": "Cartão de Débito" }
+                ]
+              },
+              {
+                "type": "If",
+                "condition": "${form.pagamento_entrega} == 'dinheiro'",
+                "then": [
+                  { "type": "TextInput", "name": "troco", "label": "Troco para quanto?", "input-type": "number", "required": false }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "If",
+            "condition": "${form.tipo_pagamento} == 'online'",
+            "then": [
+              {
+                "type": "Dropdown", "name": "pagamento_online", "label": "Forma de pagamento", "required": true,
+                "data-source": [
+                  { "id": "pix", "title": "PIX" },
+                  { "id": "credito_online", "title": "Cartão de Crédito" },
+                  { "id": "debito_online", "title": "Cartão de Débito" }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "If",
+            "condition": "${form.tipo_pagamento} == 'online'",
+            "then": [
+              {
+                "type": "Footer",
+                "label": "Gerar Link de Pagamento",
+                "on-click-action": {
+                  "name": "complete",
+                  "payload": {
+                    "flow_token": "${data.flow_token}",
+                    "item_1_id": "${data.item_1_id}", "item_2_id": "${data.item_2_id}", "item_3_id": "${data.item_3_id}", "item_4_id": "${data.item_4_id}", "item_5_id": "${data.item_5_id}",
+                    "item_6_id": "${data.item_6_id}", "item_7_id": "${data.item_7_id}", "item_8_id": "${data.item_8_id}", "item_9_id": "${data.item_9_id}", "item_10_id": "${data.item_10_id}",
+                    "qty_1": "${data.qty_1}", "qty_2": "${data.qty_2}", "qty_3": "${data.qty_3}", "qty_4": "${data.qty_4}", "qty_5": "${data.qty_5}",
+                    "qty_6": "${data.qty_6}", "qty_7": "${data.qty_7}", "qty_8": "${data.qty_8}", "qty_9": "${data.qty_9}", "qty_10": "${data.qty_10}",
+                    "observacao": "${data.observacao}", "talheres": "${data.talheres}",
+                    "cep": "${form.cep}", "endereco": "${form.endereco}", "numero": "${form.numero}", "complemento": "${form.complemento}", "referencia": "${form.referencia}",
+                    "tipo_pagamento": "${form.tipo_pagamento}", "pagamento_entrega": "${form.pagamento_entrega}", "pagamento_online": "${form.pagamento_online}", "troco": "${form.troco}"
+                  }
+                }
+              }
+            ],
+            "else": [
+              {
+                "type": "Footer",
+                "label": "Confirmar Pedido",
+                "on-click-action": {
+                  "name": "complete",
+                  "payload": {
+                    "flow_token": "${data.flow_token}",
+                    "item_1_id": "${data.item_1_id}", "item_2_id": "${data.item_2_id}", "item_3_id": "${data.item_3_id}", "item_4_id": "${data.item_4_id}", "item_5_id": "${data.item_5_id}",
+                    "item_6_id": "${data.item_6_id}", "item_7_id": "${data.item_7_id}", "item_8_id": "${data.item_8_id}", "item_9_id": "${data.item_9_id}", "item_10_id": "${data.item_10_id}",
+                    "qty_1": "${data.qty_1}", "qty_2": "${data.qty_2}", "qty_3": "${data.qty_3}", "qty_4": "${data.qty_4}", "qty_5": "${data.qty_5}",
+                    "qty_6": "${data.qty_6}", "qty_7": "${data.qty_7}", "qty_8": "${data.qty_8}", "qty_9": "${data.qty_9}", "qty_10": "${data.qty_10}",
+                    "observacao": "${data.observacao}", "talheres": "${data.talheres}",
+                    "cep": "${form.cep}", "endereco": "${form.endereco}", "numero": "${form.numero}", "complemento": "${form.complemento}", "referencia": "${form.referencia}",
+                    "tipo_pagamento": "${form.tipo_pagamento}", "pagamento_entrega": "${form.pagamento_entrega}", "pagamento_online": "${form.pagamento_online}", "troco": "${form.troco}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

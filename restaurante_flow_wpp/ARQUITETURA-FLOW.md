@@ -92,7 +92,7 @@ Recebe mensagem do cliente, identifica quem e, verifica estado.
 Webhook -> ACK 200 -> Filter & Dedup -> Config
   -> Odoo Auth (JWT)
   -> GET /customers/search (busca cliente por telefone)
-  -> GET conversations (Supabase - estado da sessao)
+  -> GET flow_conversations (Supabase - estado da sessao)
   -> Roteador Principal (switch por etapa)
 ```
 
@@ -148,14 +148,14 @@ Webhook (nfm_reply) -> Parse response_json
   -> Validar itens vs Odoo (precos, disponibilidade)
   -> POST /orders/quote (confirmar totais server-side)
   -> POST /orders (persistir pedido)
-  -> POST conversations (Supabase: etapa='pedido_ativo')
+  -> POST flow_conversations (Supabase: etapa='pedido_ativo')
   -> Enviar confirmacao ao cliente (API Meta)
   -> (se PIX) Enviar QR code / chave
 ```
 
 ## Estados da Sessao
 
-Apenas 3 estados possiveis (tabela conversations_restaurante no Supabase):
+Apenas 3 estados possiveis (tabela flow_conversations no Supabase):
 
 | etapa | contexto | significado |
 |-------|----------|-------------|
@@ -178,7 +178,7 @@ CLIENTE                                  SISTEMA (n8n workflow unico)
   |                                        |-- Odoo Auth (POST /lym-auth/auth/token)
   |                                        |-- GET /customers/search?phone={tel}
   |                                        |   -> partner_id, nome, enderecos[]
-  |                                        |-- GET conversations (Supabase)
+  |                                        |-- GET flow_conversations (Supabase)
   |                                        |   -> etapa, contexto
   |                                        |
   |                                        |-- Session Timeout?
@@ -246,7 +246,7 @@ CLIENTE                                  SISTEMA
   |     montar seu pedido"                 |
   |    [Abrir Cardapio]                    |
   |                                        |
-  |                                        |-- POST conversations (Supabase)
+  |                                        |-- POST flow_conversations (Supabase)
   |                                        |   etapa='aguardando_flow'
   |                                        |   contexto={flow_token, sent_at}
 ```
@@ -292,7 +292,7 @@ CLIENTE                                  SISTEMA
   |                                        |    payment_method, notes}
   |                                        |   FALHA? -> retry 1x -> msg suporte
   |                                        |
-  |                                        |-- POST conversations (Supabase)
+  |                                        |-- POST flow_conversations (Supabase)
   |                                        |   etapa='pedido_ativo'
   |                                        |   contexto={order_id, order_name}
   |                                        |
@@ -331,6 +331,17 @@ Keywords: "sair", "cancelar", "0"
 | `aguardando_flow` | cancela, POST conversations(etapa=''), msg escape |
 | `pedido_ativo` | pergunta "cancelar pedido #X?" [Sim] [Nao] |
 
+## Dados de Produtos (Odoo)
+
+Origem: `GET /lym/pos/pointofsales/companies/{company_id}/products`
+
+A API retorna produtos com categorias, precos, descricoes e imagens (base64).
+O n8n processa a resposta e monta o `initial_data` do Flow.
+
+**Imagens**: a API retorna `image` em base64. O campo e preservado na estrutura mas
+**preenchido manualmente** (base64 e muito pesado para manipular no n8n/Flow).
+No initial_data, `image` vai como string vazia `""` ate ser preenchido.
+
 ## Dados Dinamicos do Flow (initial_data)
 
 Payload montado pelo n8n e injetado no envio do Flow Message:
@@ -349,6 +360,7 @@ Payload montado pelo n8n e injetado no envio do Flow Message:
       "nome": "X-Burguer",
       "descricao": "Pao, hamburguer, queijo, alface, tomate",
       "preco": 22.50,
+      "image": "",
       "disponivel": true
     }
   ],
@@ -369,7 +381,7 @@ Webhook (/webhook/restaurante_{cliente})
   |
   -> Respond 200 (ACK imediato)
   -> Filter (so message + interactive, ignora status/read)
-  -> Dedup (POST processed_messages - Supabase)
+  -> Dedup (POST flow_processed_messages - Supabase)
   -> Config (Set node - UNICO NO QUE MUDA POR CLIENTE)
   -> Odoo Auth (POST /lym-auth/auth/token -> JWT)
   -> Busca Cliente (GET /customers/search?phone=)
@@ -424,9 +436,9 @@ Headers: `Authorization: Bearer {jwt}`, `X-Odoo-Database: {config.odoo_database}
 ### Supabase
 | Metodo | Endpoint | Quando |
 |--------|----------|--------|
-| POST | processed_messages_restaurante | dedup (insert message.id) |
-| GET | conversations_restaurante?store_phone_id=eq.X&customer_phone=eq.Y | pre-flow (sessao) |
-| POST | conversations_restaurante (upsert) | pre/pos-flow (salvar estado) |
+| POST | flow_processed_messages | dedup (insert message.id) |
+| GET | flow_conversations?store_phone_id=eq.X&customer_phone=eq.Y | pre-flow (sessao) |
+| POST | flow_conversations (upsert) | pre/pos-flow (salvar estado) |
 
 Headers: `apikey: {config.supabase_key}`, `Authorization: Bearer {config.supabase_key}`
 Upsert: `?on_conflict=store_phone_id,customer_phone` + `Prefer: resolution=merge-duplicates`
@@ -447,7 +459,7 @@ Headers: `Authorization: Bearer {config.wa_token}`
    - odoo_base_url, odoo_database, odoo_api_key, odoo_api_secret
    - company_id, pos_config_id
    - supabase_url, supabase_key
-   - mensagens personalizadas (opcional)
+   - mensagens personalizadas (editadas direto no Config)
 3. Alterar Webhook path: /webhook/restaurante_{nome_cliente}
 4. Renomear workflow: "Restaurante - {Nome Cliente}"
 5. Ativar workflow
@@ -457,6 +469,6 @@ Headers: `Authorization: Bearer {config.wa_token}`
 
 - **WhatsApp Flow JSON**: precisa ser refeito para aceitar dados via initial_data (100% dinamico)
 - **Workflow n8n**: criar do zero (workflow unico com tudo dentro)
-- **Supabase**: conversations_restaurante + processed_messages_restaurante (sem mudancas)
+- **Supabase**: flow_tenants (config), flow_conversations (sessao), flow_processed_messages (dedup). RLS habilitado, acesso via service_role.
 - **Odoo**: API lym_pos ja pronta (endpoints listados acima)
 - **Meta**: Flow precisa ser registrado na WABA do cliente (flow_id na Config)

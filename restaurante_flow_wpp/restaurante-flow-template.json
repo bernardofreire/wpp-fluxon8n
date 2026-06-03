@@ -1,0 +1,1688 @@
+{
+  "name": "Restaurante Flow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## [TEMPLATE] Restaurante Flow - Workflow Unico\n\n**Duplicar por cliente. Configurar:**\n\n1. **Whatsapp Webhook** -> `path` (ex: `restaurante_flow_bk_centro`)\n2. **Config** -> dados tecnicos do cliente (odoo, supabase, meta)\n3. **Messages Config** -> mensagens personalizaveis do bot\n4. Renomear o workflow (ex: `[BK CENTRO] Restaurante Flow`)\n\n**Tabelas Supabase (prefixo flow_):**\n- `flow_conversations` -> estado da sessao\n- `flow_processed_messages` -> dedup de mensagens\n\n**3 estados:** '' (livre), 'aguardando_flow', 'pedido_ativo'\n\n**wa_token e flow_id ficam no Config** (sem credentials n8n).",
+        "height": 460,
+        "width": 520
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        -896
+      ],
+      "id": "86a467c7-b2af-4925-9de9-22d1e12df109",
+      "name": "README"
+    },
+    {
+      "parameters": {
+        "multipleMethods": true,
+        "path": "restaurante_flow_CLIENTE",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        -48
+      ],
+      "id": "4c943a94-391a-453d-a467-40c2576558db",
+      "name": "Whatsapp Webhook",
+      "webhookId": "f2000000-0000-4000-b000-000000000000",
+      "notes": "PATH UNICO POR CLIENTE. Trocar 'restaurante_flow_CLIENTE' pelo identificador do cliente."
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        128,
+        64
+      ],
+      "id": "66ed17ca-e710-45f5-ad10-9a1294d048e0",
+      "name": "ACK 200",
+      "notes": "Responde 200 IMEDIATAMENTE para o Meta nao retentar."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "verify-cond-1",
+              "leftValue": "={{ $json.query['hub.mode'] }}",
+              "rightValue": "subscribe",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        128,
+        -160
+      ],
+      "id": "1156ef25-cc5a-44e6-a82c-9df6d706f3a2",
+      "name": "Is Verify?"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.query[\"hub.challenge\"] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        432,
+        -160
+      ],
+      "id": "fcf5a5d1-4ebc-47a7-8ad3-2273ae652086",
+      "name": "Verify GET"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || {};\nconst entry = body.entry?.[0];\nconst change = entry?.changes?.[0];\nconst value = change?.value || {};\n\nconst messages = value.messages;\nif (!Array.isArray(messages) || messages.length === 0) return [];\n\nconst msg = messages[0];\nif (!msg.id || !msg.from) return [];\n\nconst phoneNumberId = value.metadata?.phone_number_id;\nif (!phoneNumberId) return [];\n\nlet msg_text = '';\nlet is_nfm_reply = false;\nlet nfm_response = null;\n\nif (msg.type === 'text') {\n  msg_text = msg.text?.body || '';\n} else if (msg.type === 'interactive') {\n  if (msg.interactive?.type === 'nfm_reply') {\n    is_nfm_reply = true;\n    nfm_response = msg.interactive.nfm_reply?.response_json || '{}';\n  } else if (msg.interactive?.type === 'button_reply') {\n    msg_text = msg.interactive.button_reply?.id || '';\n  } else if (msg.interactive?.type === 'list_reply') {\n    msg_text = msg.interactive.list_reply?.id || '';\n  }\n}\n\nreturn [{\n  json: {\n    message_id: msg.id,\n    phone_number_id: phoneNumberId,\n    customer_phone: msg.from,\n    msg_type: msg.type,\n    msg_text,\n    is_nfm_reply,\n    nfm_response,\n    contact_name: value.contacts?.[0]?.profile?.name || '',\n    timestamp: msg.timestamp\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        64
+      ],
+      "id": "47cf61a0-eb76-4ea9-bbb5-f8b86e48383b",
+      "name": "Filter & Extract",
+      "notes": "Descarta statuses/system. Extrai message_id, customer_phone, msg_text, is_nfm_reply, nfm_response."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfg-01",
+              "name": "display_name",
+              "value": "RESTAURANTE_B",
+              "type": "string"
+            },
+            {
+              "id": "cfg-02",
+              "name": "phone_number_id",
+              "value": "928746166998844",
+              "type": "string"
+            },
+            {
+              "id": "cfg-03",
+              "name": "wa_token",
+              "value": "EAARN51HpxJIBQuZBNUDZA1EiW0vrUKlmbKzZAHjMvEW00HHZBZAmExQFPn5VUjv1bDxmqjycWugHcxX0UbwmzaKbvJpGS9rv1lWRUJkjeHKpMKU8XE6oSlVZA7RoQyy1jZBntATY3YaJwgRmmTiQKgq3qZCUuO32tnb82LFFENwp8VFTshuUahCLhmZB8PoEo0QZDZD",
+              "type": "string"
+            },
+            {
+              "id": "cfg-04",
+              "name": "flow_id",
+              "value": "1502781684045578",
+              "type": "string"
+            },
+            {
+              "id": "cfg-05",
+              "name": "odoo_base_url",
+              "value": "https://ocm19.lymtech.com.br",
+              "type": "string"
+            },
+            {
+              "id": "cfg-06",
+              "name": "odoo_database",
+              "value": "pvd01",
+              "type": "string"
+            },
+            {
+              "id": "cfg-07",
+              "name": "odoo_api_key",
+              "value": "QytWfufQxqj_q5sXnkVwqQ",
+              "type": "string"
+            },
+            {
+              "id": "cfg-08",
+              "name": "odoo_api_secret",
+              "value": "gcgqQx0xR8rR3shA7wuOJy96-ac4HUeTzgCQRH4AhE8",
+              "type": "string"
+            },
+            {
+              "id": "cfg-09",
+              "name": "company_id",
+              "value": 1,
+              "type": "number"
+            },
+            {
+              "id": "cfg-10",
+              "name": "pos_config_id",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "cfg-11",
+              "name": "supabase_url",
+              "value": "https://hcwfzdlxbvzoolrwtggg.supabase.co",
+              "type": "string"
+            },
+            {
+              "id": "cfg-12",
+              "name": "supabase_key",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhjd2Z6ZGx4YnZ6b29scnd0Z2dnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MDMwMzEyMywiZXhwIjoyMDk1ODc5MTIzfQ.rr8sSLKlgWH_chnTb5He06he-5Ra5gQxp-94GJNphsM",
+              "type": "string"
+            },
+            {
+              "id": "cfg-13",
+              "name": "timezone_offset",
+              "value": -3,
+              "type": "number"
+            },
+            {
+              "id": "cfg-14",
+              "name": "session_timeout_min",
+              "value": 30,
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        736,
+        64
+      ],
+      "id": "de420c2d-3ffe-4bc5-a9ef-f5edab2660cf",
+      "name": "Config",
+      "notes": "DADOS TECNICOS do cliente. Preencher ao duplicar o workflow."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "msg-01",
+              "name": "msg_welcome",
+              "value": "Ola {nome}! Toque abaixo para montar seu pedido.",
+              "type": "string"
+            },
+            {
+              "id": "msg-02",
+              "name": "msg_welcome_new",
+              "value": "Bem-vindo! Toque abaixo para montar seu pedido.",
+              "type": "string"
+            },
+            {
+              "id": "msg-03",
+              "name": "msg_closed",
+              "value": "Estamos fechados no momento. Tente novamente mais tarde.",
+              "type": "string"
+            },
+            {
+              "id": "msg-04",
+              "name": "msg_aguardando_flow",
+              "value": "Toque no botao acima para abrir o cardapio!",
+              "type": "string"
+            },
+            {
+              "id": "msg-05",
+              "name": "msg_pedido_confirmado",
+              "value": "Pedido confirmado! Acompanhe o status por aqui.",
+              "type": "string"
+            },
+            {
+              "id": "msg-06",
+              "name": "msg_escape",
+              "value": "Ok, cancelado. Quando quiser, mande um oi!",
+              "type": "string"
+            },
+            {
+              "id": "msg-07",
+              "name": "msg_erro_generico",
+              "value": "Tivemos um problema. Tente novamente ou fale com atendente.",
+              "type": "string"
+            },
+            {
+              "id": "msg-08",
+              "name": "msg_pedido_ativo",
+              "value": "Voce tem um pedido em andamento. Aguarde a conclusao ou envie *sair* para cancelar.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1056,
+        64
+      ],
+      "id": "aabf601f-3d31-44d1-a6ae-0145d2cff775",
+      "name": "Messages Config",
+      "notes": "MENSAGENS personalizaveis por cliente. Editar o tom e texto de cada mensagem."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').item.json.supabase_url }}/rest/v1/flow_processed_messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Config').item.json.supabase_key }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').item.json.supabase_key }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=ignore-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message_id\": \"{{ $('Config').item.json.message_id }}\",\n  \"store_phone_id\": \"{{ $('Config').item.json.phone_number_id }}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1376,
+        64
+      ],
+      "id": "3fdc9696-7727-4435-b3ca-59addda0fa9f",
+      "name": "Dedup Insert",
+      "notes": "Prefer=ignore-duplicates: novo retorna [{...}], duplicado retorna []."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dedup-cond-1",
+              "leftValue": "={{ $json.message_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1664,
+        64
+      ],
+      "id": "4d3f1a52-1567-4094-9c78-9fdd6d67ef94",
+      "name": "Is New?",
+      "notes": "TRUE = msg nova. FALSE = duplicada, fluxo para aqui."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').item.json.odoo_base_url }}/lym-auth/auth/token",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Odoo-Database",
+              "value": "={{ $('Config').item.json.odoo_database }}"
+            },
+            {
+              "name": "api-key",
+              "value": "={{ $('Config').item.json.odoo_api_key }}"
+            },
+            {
+              "name": "api-secret",
+              "value": "={{ $('Config').item.json.odoo_api_secret }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1968,
+        48
+      ],
+      "id": "c651261a-f0c7-44a2-8c66-93660e8bd6c6",
+      "name": "Odoo Auth",
+      "notes": "JWT 24h. Retorna access_token."
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Config').item.json.odoo_base_url }}/lym/pos/pointofsales/customers/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Filter & Extract').item.json.customer_phone }}"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Odoo Auth').item.json.access_token }}"
+            },
+            {
+              "name": "X-Odoo-Database",
+              "value": "={{ $('Config').item.json.odoo_database }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2272,
+        48
+      ],
+      "id": "c659adf3-db1b-480f-809f-b47f0e0e7b84",
+      "name": "Busca Cliente",
+      "alwaysOutputData": true,
+      "notes": "Busca cliente por telefone no Odoo. Pode retornar vazio (cliente novo)."
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Config').item.json.supabase_url }}/rest/v1/flow_conversations",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "select",
+              "value": "*"
+            },
+            {
+              "name": "store_phone_id",
+              "value": "=eq.{{ $('Config').item.json.phone_number_id }}"
+            },
+            {
+              "name": "customer_phone",
+              "value": "=eq.{{ $('Filter & Extract').item.json.customer_phone }}"
+            },
+            {
+              "name": "limit",
+              "value": "1"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Config').item.json.supabase_key }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').item.json.supabase_key }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2576,
+        48
+      ],
+      "id": "865714dc-85ae-433d-8a6d-3ee26f633ceb",
+      "name": "Busca Sessao",
+      "alwaysOutputData": true,
+      "notes": "GET flow_conversations. Retorna [] se nao existe sessao."
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst config = $('Config').item.json;\nconst filter = $('Filter & Extract').item.json;\n\nlet etapa = '';\nlet contexto = {};\nlet updated_at = null;\n\n// Supabase REST retorna array. HTTP Request pode expandir ou nao.\nlet row = null;\nif (items.length > 0) {\n  const raw = items[0].json;\n  if (Array.isArray(raw)) {\n    row = raw.length > 0 ? raw[0] : null;\n  } else if (raw && raw.customer_phone) {\n    row = raw;\n  }\n}\n\nif (row && row.customer_phone) {\n  etapa = row.etapa || '';\n  contexto = row.contexto || {};\n  updated_at = row.updated_at;\n\n  // Session timeout check\n  if (etapa !== '' && updated_at) {\n    const updatedMs = new Date(updated_at).getTime();\n    const nowMs = Date.now();\n    const timeoutMs = (config.session_timeout_min || 30) * 60 * 1000;\n    if (nowMs - updatedMs > timeoutMs) {\n      etapa = '';\n      contexto = {};\n    }\n  }\n}\n\n// Flags para roteamento\nconst is_nfm_reply = filter.is_nfm_reply || false;\nconst msgText = (filter.msg_text || '').toLowerCase().trim();\nconst is_escape = ['sair', 'cancelar', '0'].includes(msgText);\n\nreturn [{ json: { etapa, contexto, is_nfm_reply, is_escape } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2864,
+        48
+      ],
+      "id": "ed4e2d26-3f89-47fa-833a-877c6eefdeb2",
+      "name": "Normalize State",
+      "notes": "Extrai etapa/contexto da sessao + verifica timeout + flags de roteamento."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "nfm-cond-1",
+              "leftValue": "={{ $json.is_nfm_reply }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3168,
+        48
+      ],
+      "id": "8b8ad993-f1fa-4672-bcc1-ce5aabbe8282",
+      "name": "Is NFM Reply?",
+      "notes": "TRUE = resposta do WhatsApp Flow (nfm_reply). FALSE = msg normal."
+    },
+    {
+      "parameters": {
+        "jsCode": "const filter = $('Filter & Extract').item.json;\nconst state = $('Normalize State').item.json;\nconst config = $('Config').item.json;\nconst cliente = $('Busca Cliente').first().json;\n\nlet response = {};\ntry {\n  response = JSON.parse(filter.nfm_response || '{}');\n} catch (e) {\n  return [{ json: { valid: false, error: 'invalid_json' } }];\n}\n\nconst savedToken = state.contexto?.flow_token;\nif (savedToken && response.flow_token && response.flow_token !== savedToken) {\n  return [{ json: { valid: false, error: 'invalid_token' } }];\n}\n\n// Collect items with quantities from item_N_id + qty_N (v3 format)\nconst lines = [];\nfor (let i = 1; i <= 10; i++) {\n  const itemId = response['item_' + i + '_id'];\n  const qty = parseInt(response['qty_' + i] || '0', 10);\n  if (itemId && itemId !== '' && qty > 0) {\n    lines.push({ product_id: parseInt(itemId, 10), qty });\n  }\n}\n\n// Build delivery address from form fields\nconst deliveryAddress = {};\nif (response.cep) {\n  deliveryAddress.new = {\n    street: response.endereco || '',\n    street2: response.numero || '',\n    zip: response.cep || '',\n    comment: [response.complemento, response.referencia].filter(Boolean).join(' - ')\n  };\n  deliveryAddress.add_new_address = true;\n  deliveryAddress.set_as_default = false;\n}\n\n// Determine payment method\nlet paymentMethod = 'pix';\nif (response.tipo_pagamento === 'entrega') {\n  paymentMethod = response.pagamento_entrega || 'dinheiro';\n} else if (response.tipo_pagamento === 'online') {\n  paymentMethod = response.pagamento_online || 'pix';\n}\n\nconst partnerId = cliente?.id || null;\nconst orderBody = {\n  partner_id: partnerId,\n  pos_config_id: config.pos_config_id,\n  lines,\n  delivery_address: deliveryAddress,\n  payment_method: paymentMethod,\n  notes: response.observacao || '',\n  talheres: response.talheres || 'nao',\n  troco_para: response.troco || null\n};\n\nreturn [{ json: {\n  valid: true,\n  order_body: orderBody,\n  pagamento: {\n    metodo: paymentMethod,\n    troco_para: response.troco || null,\n    tipo: response.tipo_pagamento || ''\n  }\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3520,
+        -608
+      ],
+      "id": "e4bdf78f-6394-41dd-bf2a-f4158b201f4d",
+      "name": "Parse Flow Response",
+      "notes": "Valida flow_token e monta body do pedido para Odoo."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').item.json.odoo_base_url }}/lym/pos/pointofsales/orders",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Odoo Auth').item.json.access_token }}"
+            },
+            {
+              "name": "X-Odoo-Database",
+              "value": "={{ $('Config').item.json.odoo_database }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($('Parse Flow Response').item.json.order_body) }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3824,
+        -608
+      ],
+      "id": "c05a2d04-2830-4b54-87f0-2ddbc57813d5",
+      "name": "Create Order",
+      "notes": "POST /orders no Odoo. Cria o pedido."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').item.json.supabase_url }}/rest/v1/flow_conversations?on_conflict=store_phone_id,customer_phone",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Config').item.json.supabase_key }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').item.json.supabase_key }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  store_phone_id: $('Config').item.json.phone_number_id,\n  customer_phone: $('Filter & Extract').item.json.customer_phone,\n  etapa: 'pedido_ativo',\n  contexto: {\n    order_id: $('Create Order').item.json.id || $('Create Order').item.json.order_id,\n    order_name: $('Create Order').item.json.name || $('Create Order').item.json.order_name || ''\n  },\n  partner_id: $('Parse Flow Response').item.json.order_body?.partner_id || null,\n  user_name: $('Filter & Extract').item.json.contact_name || '',\n  updated_at: new Date().toISOString()\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4112,
+        -608
+      ],
+      "id": "b525ffdf-674c-49dd-ac47-500c40ebd5d9",
+      "name": "Save Pedido Ativo",
+      "notes": "Upsert flow_conversations: etapa=pedido_ativo, contexto={order_id, order_name}."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v24.0/{{ $('Config').item.json.phone_number_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').item.json.wa_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $('Filter & Extract').item.json.customer_phone }}\",\n  \"type\": \"text\",\n  \"text\": { \"body\": \"{{ $('Messages Config').item.json.msg_pedido_confirmado }}\" }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4416,
+        -608
+      ],
+      "id": "c319369b-1c62-41d1-9593-19873e607626",
+      "name": "Send Confirmation"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "escape-cond-1",
+              "leftValue": "={{ $json.is_escape }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3472,
+        48
+      ],
+      "id": "2a0df714-8a89-42b7-8185-cdd9591011f2",
+      "name": "Is Escape?",
+      "notes": "Palavras-chave: sair, cancelar, 0"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').item.json.supabase_url }}/rest/v1/flow_conversations?on_conflict=store_phone_id,customer_phone",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Config').item.json.supabase_key }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').item.json.supabase_key }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  store_phone_id: $('Config').item.json.phone_number_id,\n  customer_phone: $('Filter & Extract').item.json.customer_phone,\n  etapa: '',\n  contexto: {},\n  updated_at: new Date().toISOString()\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3824,
+        -352
+      ],
+      "id": "58dda694-25e4-43e3-bb9f-4eef24b1149f",
+      "name": "Reset State",
+      "notes": "Reseta sessao: etapa='', contexto={}."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v24.0/{{ $('Config').item.json.phone_number_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').item.json.wa_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $('Filter & Extract').item.json.customer_phone }}\",\n  \"type\": \"text\",\n  \"text\": { \"body\": \"{{ $('Messages Config').item.json.msg_escape }}\" }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4112,
+        -352
+      ],
+      "id": "64e69ee6-f794-4be1-a7c0-ec0aab00e141",
+      "name": "Send Escape Msg"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-livre",
+                    "leftValue": "={{ $json.etapa }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "livre"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-aguardando",
+                    "leftValue": "={{ $json.etapa }}",
+                    "rightValue": "aguardando_flow",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "aguardando_flow"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "route-pedido",
+                    "leftValue": "={{ $json.etapa }}",
+                    "rightValue": "pedido_ativo",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pedido_ativo"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "fallback_livre"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3776,
+        288
+      ],
+      "id": "5239306f-fc66-41ca-993a-63d633579b19",
+      "name": "Roteador",
+      "notes": "Switch por etapa: '' (livre), 'aguardando_flow', 'pedido_ativo'. Fallback -> livre."
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Config').item.json.odoo_base_url }}/lym/pos/pointofsales/companies/{{ $('Config').item.json.company_id }}/pos",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Odoo Auth').item.json.access_token }}"
+            },
+            {
+              "name": "X-Odoo-Database",
+              "value": "={{ $('Config').item.json.odoo_database }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4112,
+        320
+      ],
+      "id": "482bd07a-61f6-4c08-97b3-d208bdafb9b7",
+      "name": "Get POS Config",
+      "notes": "GET /companies/{id}/pos - verifica se loja pode receber pedidos."
+    },
+    {
+      "parameters": {
+        "jsCode": "const posResponse = $input.first().json;\nconst config = $('Config').item.json;\nlet canReceive = false;\n\n// Resposta pode ser array de POS configs ou objeto unico\nif (Array.isArray(posResponse)) {\n  const pos = posResponse.find(p => p.id === config.pos_config_id);\n  canReceive = pos ? pos.can_receive_orders !== false : false;\n} else if (posResponse && typeof posResponse === 'object') {\n  // Pode ser objeto com campo data ou direto\n  const data = posResponse.data || posResponse;\n  if (Array.isArray(data)) {\n    const pos = data.find(p => p.id === config.pos_config_id);\n    canReceive = pos ? pos.can_receive_orders !== false : false;\n  } else {\n    canReceive = data.can_receive_orders !== false;\n  }\n}\n\n// return [{ json: { can_receive_orders: canReceive } }];\nreturn [{ json: { can_receive_orders: true } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4416,
+        320
+      ],
+      "id": "07ef1da4-1cfd-4db8-ba79-1766391998dc",
+      "name": "Check Can Receive",
+      "notes": "Normaliza resposta do POS e verifica can_receive_orders."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "open-cond-1",
+              "leftValue": "={{ $json.can_receive_orders }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4720,
+        320
+      ],
+      "id": "04dc8e4c-1eb0-4e4b-b758-fa89f4469616",
+      "name": "Is Open?",
+      "notes": "TRUE = loja aberta, envia Flow. FALSE = fechada, envia msg."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v24.0/{{ $('Config').first().json.phone_number_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').first().json.wa_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $('Filter & Extract').first().json.customer_phone }}\",\n  \"type\": \"text\",\n  \"text\": { \"body\": \"{{ $('Messages Config').first().json.msg_closed }}\" }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5024,
+        576
+      ],
+      "id": "f6238fcf-89a7-4cb1-bb72-4c5844c485d3",
+      "name": "Send Closed Msg",
+      "notes": "Loja fechada. Nao salva sessao."
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Config').first().json.odoo_base_url }}/lym/pos/pointofsales/companies/{{ $('Config').first().json.company_id }}/products",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Odoo Auth').first().json.access_token }}"
+            },
+            {
+              "name": "X-Odoo-Database",
+              "value": "={{ $('Config').first().json.odoo_database }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5024,
+        320
+      ],
+      "id": "8bc06ebd-4f47-45e8-9dbd-775aac3529ad",
+      "name": "Get Products",
+      "notes": "GET /companies/{id}/products - catalogo completo do Odoo."
+    },
+    {
+      "parameters": {
+        "jsCode": "const config = $('Config').first().json;\nconst msgs = $('Messages Config').first().json;\nconst filter = $('Filter & Extract').first().json;\nconst cliente = $('Busca Cliente').first().json;\n\n// Products from Odoo API\nconst productsResponse = $input.first().json;\nlet products = [];\nif (Array.isArray(productsResponse)) {\n  products = productsResponse;\n} else if (productsResponse?.data && Array.isArray(productsResponse.data)) {\n  products = productsResponse.data;\n} else if (productsResponse?.products && Array.isArray(productsResponse.products)) {\n  products = productsResponse.products;\n}\n\n// Group products by category\nconst catGroups = {};\nfor (const p of products) {\n  const catId = String(p.pos_categ_id?.[0] || p.categ_id?.[0] || 'outros');\n  const catName = p.pos_categ_id?.[1] || p.categ_id?.[1] || 'Outros';\n  if (!catGroups[catId]) {\n    catGroups[catId] = { name: catName, items: [] };\n  }\n  const preco = p.lst_price || p.list_price || 0;\n  catGroups[catId].items.push({\n    id: String(p.id),\n    title: `${p.name || p.display_name} - R$${preco.toFixed(2).replace('.', ',')}`\n  });\n}\n\n// Build cat_N_name, cat_N_items, cat_N_visible (max 10 slots)\nconst categories = Object.values(catGroups);\nconst initialData = {\n  flow_token: '',\n  has_items: false,\n  has_enderecos: false,\n  enderecos_salvos: [],\n  metodos_pagamento: [\n    { id: 'pix', title: 'PIX' },\n    { id: 'cartao_entrega', title: 'Cartao na entrega' },\n    { id: 'dinheiro', title: 'Dinheiro' }\n  ]\n};\nfor (let i = 1; i <= 10; i++) {\n  const cat = categories[i - 1];\n  initialData[`cat_${i}_name`] = cat ? cat.name : '';\n  initialData[`cat_${i}_items`] = cat ? cat.items : [];\n  initialData[`cat_${i}_visible`] = !!cat;\n}\n\n// Customer info\nconst customerName = cliente?.name || filter.contact_name || '';\nconst partnerId = cliente?.id || null;\n\n// Customer delivery addresses (children contacts type=delivery)\nif (cliente?.children && Array.isArray(cliente.children)) {\n  const addrs = cliente.children\n    .filter(c => c.type === 'delivery')\n    .map(c => ({\n      id: String(c.id),\n      title: `${c.street || ''}, ${c.city || ''}`.replace(/^, |, $/g, '')\n    }))\n    .filter(a => a.title.trim());\n  if (addrs.length > 0) {\n    initialData.has_enderecos = true;\n    initialData.enderecos_salvos = addrs;\n  }\n}\n\n// Generate flow_token (anti-replay)\nconst flow_token = `ft_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;\ninitialData.flow_token = flow_token;\n\n// Welcome message\nconst isNew = !partnerId;\nconst msgTemplate = isNew ? msgs.msg_welcome_new : msgs.msg_welcome;\nconst welcomeMsg = msgTemplate.replace('{nome}', customerName).replace('{display_name}', config.display_name);\n\n// Build complete Flow message body for Meta API\nconst flowMessageBody = {\n  messaging_product: 'whatsapp',\n  to: filter.customer_phone,\n  type: 'interactive',\n  interactive: {\n    type: 'flow',\n    body: { text: welcomeMsg },\n    action: {\n      name: 'flow',\n      parameters: {\n        flow_message_version: '3',\n        flow_id: String(config.flow_id),\n        flow_token,\n        flow_cta: 'Abrir Cardapio',\n        mode: 'draft',\n        flow_action: 'navigate',\n        flow_action_payload: {\n          screen: 'CARDAPIO',\n          data: initialData\n        }\n      }\n    }\n  }\n};\n\n// Product map for endpoint (id -> {name, price})\nconst productMap = {};\nfor (const p of products) {\n  const preco = p.lst_price || p.list_price || 0;\n  productMap[String(p.id)] = { name: p.name || p.display_name, price: preco };\n}\n\nreturn [{ json: {\n  initial_data: initialData,\n  flow_token,\n  partner_id: partnerId,\n  customer_name: customerName,\n  flow_message_body: flowMessageBody,\n  product_map: productMap\n}}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5312,
+        320
+      ],
+      "id": "d3d8d70c-0d0b-44a4-8627-6ba29de04c53",
+      "name": "Mount Initial Data",
+      "notes": "Monta initial_data + flow_message_body + flow_token."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v24.0/{{ $('Config').first().json.phone_number_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').first().json.wa_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.flow_message_body) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5616,
+        320
+      ],
+      "id": "b0f1241d-9170-48bb-91b9-efb8f8b8ba66",
+      "name": "Send Flow Message",
+      "notes": "Envia WhatsApp Flow com cardapio dinamico."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.supabase_url }}/rest/v1/flow_conversations?on_conflict=store_phone_id,customer_phone",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Config').first().json.supabase_key }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').first().json.supabase_key }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates,return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  store_phone_id: $('Config').first().json.phone_number_id,\n  customer_phone: $('Filter & Extract').first().json.customer_phone,\n  etapa: 'aguardando_flow',\n  contexto: {\n    flow_token: $('Mount Initial Data').first().json.flow_token,\n    sent_at: new Date().toISOString(),\n    product_map: $('Mount Initial Data').first().json.product_map\n  },\n  partner_id: $('Mount Initial Data').first().json.partner_id || null,\n  user_name: $('Filter & Extract').first().json.contact_name || '',\n  updated_at: new Date().toISOString()\n}) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5920,
+        320
+      ],
+      "id": "ad972c25-dd6d-401d-b578-d2d417da06c4",
+      "name": "Save Aguardando",
+      "notes": "Upsert flow_conversations: etapa=aguardando_flow, contexto={flow_token, sent_at}."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v24.0/{{ $('Config').item.json.phone_number_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').item.json.wa_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $('Filter & Extract').item.json.customer_phone }}\",\n  \"type\": \"text\",\n  \"text\": { \"body\": \"{{ $('Messages Config').item.json.msg_aguardando_flow }}\" }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4112,
+        -96
+      ],
+      "id": "4b6b2857-57c3-4f53-8c91-c9f92f087be1",
+      "name": "Send Aguardando Msg",
+      "notes": "Etapa aguardando_flow: lembra o cliente de abrir o Flow."
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Config').item.json.odoo_base_url }}/lym/pos/pointofsales/orders/{{ $json.contexto.order_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Odoo Auth').item.json.access_token }}"
+            },
+            {
+              "name": "X-Odoo-Database",
+              "value": "={{ $('Config').item.json.odoo_database }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4112,
+        128
+      ],
+      "id": "8fd306e5-535d-4289-bb1d-4b295135a1c8",
+      "name": "Get Order Status",
+      "alwaysOutputData": true,
+      "notes": "GET /orders/{order_id} - busca status do pedido ativo."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v24.0/{{ $('Config').item.json.phone_number_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Config').item.json.wa_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"to\": \"{{ $('Filter & Extract').item.json.customer_phone }}\",\n  \"type\": \"text\",\n  \"text\": { \"body\": \"{{ $('Messages Config').item.json.msg_pedido_ativo }}\" }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4416,
+        128
+      ],
+      "id": "4289ab3a-3ec6-407d-9ab8-c8f57d517c2a",
+      "name": "Send Status Msg",
+      "notes": "Informa status do pedido ativo ao cliente."
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "flow_endpoint_CLIENTE",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        800
+      ],
+      "id": "fe000001-0000-4000-b000-000000000001",
+      "name": "Flow Endpoint",
+      "webhookId": "fe000000-0000-4000-b000-000000000000",
+      "notes": "Endpoint do WhatsApp Flow (Meta envia requests criptografadas: ping, INIT, data_exchange). PATH UNICO POR CLIENTE."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "flow-pk-1",
+              "name": "flow_private_key",
+              "value": "COLE_A_CHAVE_PRIVADA_RSA_AQUI",
+              "type": "string"
+            },
+            {
+              "id": "flow-sb-url",
+              "name": "supabase_url",
+              "value": "COLE_A_URL_SUPABASE_AQUI",
+              "type": "string"
+            },
+            {
+              "id": "flow-sb-key",
+              "name": "supabase_key",
+              "value": "COLE_A_SERVICE_ROLE_KEY_AQUI",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        300,
+        800
+      ],
+      "id": "fe000002-0000-4000-b000-000000000002",
+      "name": "Flow Config",
+      "notes": "Chave privada RSA (PEM). Copiar conteudo do flow_private_key.pem."
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\nconst https = require('https');\n\nconst flowConfig = $('Flow Config').first().json;\nconst privateKeyPem = flowConfig.flow_private_key;\nconst supabaseUrl = flowConfig.supabase_url;\nconst supabaseKey = flowConfig.supabase_key;\nconst body = $input.first().json.body;\n\n// --- Decrypt ---\nconst encryptedAesKey = Buffer.from(body.encrypted_aes_key, 'base64');\nconst encryptedFlowData = Buffer.from(body.encrypted_flow_data, 'base64');\nconst iv = Buffer.from(body.initial_vector, 'base64');\n\nconst aesKey = crypto.privateDecrypt({\n  key: privateKeyPem,\n  padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,\n  oaepHash: 'sha256',\n}, encryptedAesKey);\n\nconst TAG_LENGTH = 16;\nconst ct = encryptedFlowData.slice(0, -TAG_LENGTH);\nconst authTag = encryptedFlowData.slice(-TAG_LENGTH);\nconst decipher = crypto.createDecipheriv('aes-128-gcm', aesKey, iv);\ndecipher.setAuthTag(authTag);\nconst decrypted = Buffer.concat([decipher.update(ct), decipher.final()]);\nconst request = JSON.parse(decrypted.toString('utf8'));\n\n// --- Helper: encrypt response ---\nfunction encryptResponse(responseObj) {\n  const str = JSON.stringify(responseObj);\n  const newIv = crypto.randomBytes(12);\n  const cipher = crypto.createCipheriv('aes-128-gcm', aesKey, newIv);\n  const enc = Buffer.concat([cipher.update(str, 'utf8'), cipher.final(), cipher.getAuthTag()]);\n  return { encrypted_flow_data: enc.toString('base64'), initial_vector: newIv.toString('base64') };\n}\n\n// --- Helper: HTTPS GET ---\nfunction httpGet(url, headers) {\n  return new Promise((resolve, reject) => {\n    const u = new URL(url);\n    const opts = { hostname: u.hostname, path: u.pathname + u.search, headers, method: 'GET' };\n    const req = https.request(opts, (res) => {\n      let d = '';\n      res.on('data', c => d += c);\n      res.on('end', () => { try { resolve(JSON.parse(d)); } catch(e) { resolve(d); } });\n    });\n    req.on('error', reject);\n    req.end();\n  });\n}\n\n// --- Handle action ---\nlet result;\n\nif (request.action === 'ping' || request.action === 'INIT') {\n  result = encryptResponse({ version: '3.0', data: { status: 'active' } });\n\n} else if (request.action === 'data_exchange') {\n  const formData = request.data || {};\n  const flowToken = formData.flow_token || '';\n\n  // Collect selected item IDs from cat_1..cat_10\n  const selectedIds = [];\n  for (let i = 1; i <= 10; i++) {\n    const items = formData['cat_' + i];\n    if (Array.isArray(items)) selectedIds.push(...items);\n  }\n\n  // Fetch product_map from Supabase (stored in flow_conversations.contexto)\n  const filterUrl = supabaseUrl + '/rest/v1/flow_conversations?select=contexto&contexto-%3E%3Eflow_token=eq.' + encodeURIComponent(flowToken) + '&limit=1';\n  const rows = await httpGet(filterUrl, {\n    apikey: supabaseKey,\n    Authorization: 'Bearer ' + supabaseKey\n  });\n  const productMap = (Array.isArray(rows) && rows[0] && rows[0].contexto && rows[0].contexto.product_map) || {};\n\n  // Build CARRINHO screen data\n  const carrinhoData = {\n    flow_token: flowToken,\n    qty_options: Array.from({length: 10}, (_, i) => ({ id: String(i+1), title: String(i+1) }))\n  };\n  for (let i = 1; i <= 10; i++) {\n    const itemId = selectedIds[i - 1];\n    if (itemId) {\n      const prod = productMap[itemId] || {};\n      const name = prod.name || 'Item ' + itemId;\n      const price = prod.price || 0;\n      carrinhoData['item_' + i + '_id'] = itemId;\n      carrinhoData['item_' + i + '_name'] = name + ' - R$' + price.toFixed(2).replace('.', ',');\n      carrinhoData['item_' + i + '_visible'] = true;\n    } else {\n      carrinhoData['item_' + i + '_id'] = '';\n      carrinhoData['item_' + i + '_name'] = '';\n      carrinhoData['item_' + i + '_visible'] = false;\n    }\n  }\n\n  result = encryptResponse({ version: '3.0', screen: 'CARRINHO', data: carrinhoData });\n\n} else {\n  result = encryptResponse({ version: '3.0', data: { status: 'active' } });\n}\n\nreturn [{ json: result }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        800
+      ],
+      "id": "fe000003-0000-4000-b000-000000000003",
+      "name": "Flow Crypto",
+      "notes": "Descriptografa request do Meta, processa (ping/INIT/data_exchange), criptografa response."
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"encrypted_flow_data\": \"{{ $json.encrypted_flow_data }}\",\n  \"initial_vector\": \"{{ $json.initial_vector }}\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1100,
+        800
+      ],
+      "id": "fe000004-0000-4000-b000-000000000004",
+      "name": "Flow Response",
+      "notes": "Retorna resposta criptografada para o Meta."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Whatsapp Webhook": {
+      "main": [
+        [
+          {
+            "node": "Is Verify?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ACK 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ACK 200": {
+      "main": [
+        [
+          {
+            "node": "Filter & Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Verify?": {
+      "main": [
+        [
+          {
+            "node": "Verify GET",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter & Extract": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Messages Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Messages Config": {
+      "main": [
+        [
+          {
+            "node": "Dedup Insert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dedup Insert": {
+      "main": [
+        [
+          {
+            "node": "Is New?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is New?": {
+      "main": [
+        [
+          {
+            "node": "Odoo Auth",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Odoo Auth": {
+      "main": [
+        [
+          {
+            "node": "Busca Cliente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca Cliente": {
+      "main": [
+        [
+          {
+            "node": "Busca Sessao",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca Sessao": {
+      "main": [
+        [
+          {
+            "node": "Normalize State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize State": {
+      "main": [
+        [
+          {
+            "node": "Is NFM Reply?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is NFM Reply?": {
+      "main": [
+        [
+          {
+            "node": "Parse Flow Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Escape?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Flow Response": {
+      "main": [
+        [
+          {
+            "node": "Create Order",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Order": {
+      "main": [
+        [
+          {
+            "node": "Save Pedido Ativo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Pedido Ativo": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Escape?": {
+      "main": [
+        [
+          {
+            "node": "Reset State",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Roteador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reset State": {
+      "main": [
+        [
+          {
+            "node": "Send Escape Msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Roteador": {
+      "main": [
+        [
+          {
+            "node": "Get POS Config",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Aguardando Msg",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Order Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get POS Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get POS Config": {
+      "main": [
+        [
+          {
+            "node": "Check Can Receive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Can Receive": {
+      "main": [
+        [
+          {
+            "node": "Is Open?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Open?": {
+      "main": [
+        [
+          {
+            "node": "Get Products",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Closed Msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Products": {
+      "main": [
+        [
+          {
+            "node": "Mount Initial Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mount Initial Data": {
+      "main": [
+        [
+          {
+            "node": "Send Flow Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Flow Message": {
+      "main": [
+        [
+          {
+            "node": "Save Aguardando",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Order Status": {
+      "main": [
+        [
+          {
+            "node": "Send Status Msg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flow Endpoint": {
+      "main": [
+        [
+          {
+            "node": "Flow Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flow Config": {
+      "main": [
+        [
+          {
+            "node": "Flow Crypto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flow Crypto": {
+      "main": [
+        [
+          {
+            "node": "Flow Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "14c0713e-054b-4a31-9c41-fead8c13d1c0",
+  "meta": {
+    "instanceId": "bf9c0705358f3424eb1d41219c56e9c5f5a259e2443c6a07b72a86e802497145"
+  },
+  "id": "OZibyqSQvU1MttX4",
+  "tags": []
+}
