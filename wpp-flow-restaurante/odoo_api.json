@@ -1,0 +1,3780 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+        "title": "pos-lym",
+        "version": "0.1.0"
+    },
+    "paths": {
+        "/pointofsales/companies/{company_id}/pos": {
+            "get": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "List Pos By Company",
+                "description": "Lista os pontos de venda (pos.config) de uma empresa/restaurante.",
+                "operationId": "list_pos_by_company_pointofsales_companies__company_id__pos_get",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "company_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Company Id"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filtro opcional por nome do PDV",
+                            "title": "Name"
+                        },
+                        "description": "Filtro opcional por nome do PDV"
+                    },
+                    {
+                        "name": "only_active",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true,
+                            "title": "Only Active"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/PosConfigSummary"
+                                    },
+                                    "title": "Response List Pos By Company Pointofsales Companies  Company Id  Pos Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/pos/{pos_id}": {
+            "get": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Get Pos",
+                "description": "Detalhes de um ponto de venda específico.",
+                "operationId": "get_pos_pointofsales_pos__pos_id__get",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "pos_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Pos Id"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PosConfigDetail"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/companies/{company_id}/products": {
+            "get": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "List Products By Company",
+                "description": "Lista os produtos do catálogo de uma empresa.",
+                "operationId": "list_products_by_company_pointofsales_companies__company_id__products_get",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "company_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Company Id"
+                        }
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filtro opcional por nome/código/barcode",
+                            "title": "Name"
+                        },
+                        "description": "Filtro opcional por nome/código/barcode"
+                    },
+                    {
+                        "name": "available_in_pos",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": true,
+                            "title": "Available In Pos"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 500,
+                            "minimum": 1,
+                            "default": 100,
+                            "title": "Limit"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "default": 0,
+                            "title": "Offset"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ProductSummary"
+                                    },
+                                    "title": "Response List Products By Company Pointofsales Companies  Company Id  Products Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/products/{product_id}": {
+            "get": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Get Product",
+                "description": "Detalhes de um produto específico.",
+                "operationId": "get_product_pointofsales_products__product_id__get",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "product_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Product Id"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductDetail"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/orders/quote": {
+            "post": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Quote Order",
+                "description": "Cota um pedido sem persistir: aplica pricelist e impostos nativos.",
+                "operationId": "quote_order_pointofsales_orders_quote_post",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/QuoteInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/QuoteOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/customers/search": {
+            "get": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Search Customers",
+                "description": "Busca clientes da empresa autenticada por phone (exato) ou nome (ilike).\n\nRetorna o partner principal junto com seus endereços de entrega (filhos\ntype='delivery'). Pelo menos um dos parâmetros (phone OU name) é obrigatório.\nPor padrão só retorna clientes ativos — use `include_archived=true` para\nlocalizar clientes a serem restaurados.",
+                "operationId": "search_customers_pointofsales_customers_search_get",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "phone",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Busca exata por phone",
+                            "title": "Phone"
+                        },
+                        "description": "Busca exata por phone"
+                    },
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Busca parcial por nome (ilike)",
+                            "title": "Name"
+                        },
+                        "description": "Busca parcial por nome (ilike)"
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "default": 20,
+                            "title": "Limit"
+                        }
+                    },
+                    {
+                        "name": "include_archived",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "description": "Quando true, inclui clientes arquivados (active=False) no resultado",
+                            "default": false,
+                            "title": "Include Archived"
+                        },
+                        "description": "Quando true, inclui clientes arquivados (active=False) no resultado"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/CustomerOutput"
+                                    },
+                                    "title": "Response Search Customers Pointofsales Customers Search Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/customers/{customer_id}": {
+            "get": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Get Customer",
+                "description": "Retorna o cliente + endereços de entrega cadastrados.",
+                "operationId": "get_customer_pointofsales_customers__customer_id__get",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Customer Id"
+                        }
+                    },
+                    {
+                        "name": "include_archived",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "description": "Quando true, permite consultar cliente arquivado (active=False)",
+                            "default": false,
+                            "title": "Include Archived"
+                        },
+                        "description": "Quando true, permite consultar cliente arquivado (active=False)"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Update Customer",
+                "description": "Atualiza dados do cliente principal (partial update — só campos enviados).",
+                "operationId": "update_customer_pointofsales_customers__customer_id__patch",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Customer Id"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CustomerUpdateInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Delete Customer",
+                "description": "Arquiva o cliente (active=False) e todos os endereços filhos.\n\nNão faz hard-delete pois pode haver pedidos antigos referenciando o partner.",
+                "operationId": "delete_customer_pointofsales_customers__customer_id__delete",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Customer Id"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/customers/{customer_id}/restore": {
+            "post": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Restore Customer",
+                "description": "Restaura (active=True) um cliente arquivado.\n\nSe `restore_addresses=true` (default), reativa também todos os endereços\nfilhos type='delivery' que estavam arquivados. Endereços individuais podem\nser restaurados via POST /customers/{id}/addresses/{addr_id}/restore.",
+                "operationId": "restore_customer_pointofsales_customers__customer_id__restore_post",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Customer Id"
+                        }
+                    },
+                    {
+                        "name": "restore_addresses",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "description": "Quando true (default), também reativa todos os endereços filhos arquivados",
+                            "default": true,
+                            "title": "Restore Addresses"
+                        },
+                        "description": "Quando true (default), também reativa todos os endereços filhos arquivados"
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CustomerOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/customers/{customer_id}/addresses/{address_id}": {
+            "patch": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Update Customer Address",
+                "description": "Atualiza um endereço de entrega (filho do customer, type='delivery').",
+                "operationId": "update_customer_address_pointofsales_customers__customer_id__addresses__address_id__patch",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Customer Id"
+                        }
+                    },
+                    {
+                        "name": "address_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Address Id"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddressUpdateInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Delete Customer Address",
+                "description": "Arquiva um endereço de entrega (active=False).\n\nNão faz hard-delete pois pode estar vinculado a pedidos via\npos.order.delivery_partner_id.",
+                "operationId": "delete_customer_address_pointofsales_customers__customer_id__addresses__address_id__delete",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Customer Id"
+                        }
+                    },
+                    {
+                        "name": "address_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Address Id"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/customers/{customer_id}/addresses/{address_id}/restore": {
+            "post": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Restore Customer Address",
+                "description": "Restaura (active=True) um endereço arquivado.\n\nRequer que o cliente pai esteja ativo — se ele estiver arquivado, use\nprimeiro POST /customers/{id}/restore.",
+                "operationId": "restore_customer_address_pointofsales_customers__customer_id__addresses__address_id__restore_post",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Customer Id"
+                        }
+                    },
+                    {
+                        "name": "address_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Address Id"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/orders": {
+            "post": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Create Order",
+                "description": "Cria um pos.order em estado 'draft' (Em andamento) no PDV informado.",
+                "operationId": "create_order_pointofsales_orders_post",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/OrderCreateInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "get": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "List Orders",
+                "description": "Lista pedidos da empresa autenticada.",
+                "operationId": "list_orders_pointofsales_orders_get",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "state",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "Filtra por state (pending, draft, paid, etc.)",
+                            "title": "State"
+                        },
+                        "description": "Filtra por state (pending, draft, paid, etc.)"
+                    },
+                    {
+                        "name": "source",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Source"
+                        }
+                    },
+                    {
+                        "name": "pos_config_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Pos Config Id"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 200,
+                            "minimum": 1,
+                            "default": 50,
+                            "title": "Limit"
+                        }
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "minimum": 0,
+                            "default": 0,
+                            "title": "Offset"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/OrderOutput"
+                                    },
+                                    "title": "Response List Orders Pointofsales Orders Get"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/orders/{order_id}/checkout": {
+            "post": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Checkout Order",
+                "description": "Finaliza um pedido.\n\nAceita pedidos em:\n- `draft`: comportamento padrão (paid=true registra pagamento; paid=false cancela)\n- `out_for_delivery`: confirma a entrega. Se o pedido tem `delivery_code`\n  (pré-pago no momento do dispatch), o `payload.delivery_code` é obrigatório\n  e precisa bater. Para entrega pós-paga (sem code), registra o pagamento\n  como num draft normal.",
+                "operationId": "checkout_order_pointofsales_orders__order_id__checkout_post",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Order Id"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CheckoutInput"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CheckoutOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/orders/{order_id}": {
+            "get": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Get Order",
+                "description": "Retorna o detalhe de um pedido da empresa autenticada.",
+                "operationId": "get_order_pointofsales_orders__order_id__get",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Order Id"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/orders/{order_id}/accept": {
+            "post": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Accept Order",
+                "description": "Aceita um pedido em 'pending' e o move para 'draft'.",
+                "operationId": "accept_order_pointofsales_orders__order_id__accept_post",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Order Id"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pointofsales/orders/{order_id}/reject": {
+            "post": {
+                "tags": [
+                    "pointofsales"
+                ],
+                "summary": "Reject Order",
+                "description": "Rejeita um pedido em 'pending' e o move para 'rejected'.",
+                "operationId": "reject_order_pointofsales_orders__order_id__reject_post",
+                "security": [
+                    {
+                        "HTTPBearer": []
+                    }
+                ],
+                "parameters": [
+                    {
+                        "name": "order_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "title": "Order Id"
+                        }
+                    },
+                    {
+                        "name": "Accept-Language",
+                        "in": "header",
+                        "required": false,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language.",
+                            "title": "Accept-Language"
+                        },
+                        "description": "The Accept-Language header is used to specify the language of the content to be returned. If a language is not available, the server will return the content in the default language."
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RejectInput",
+                                "default": {}
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrderOutput"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AddressInput": {
+                "properties": {
+                    "street": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Street"
+                    },
+                    "street2": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Street2"
+                    },
+                    "city": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "City"
+                    },
+                    "zip": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Zip"
+                    },
+                    "state_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "State Id"
+                    },
+                    "country_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Country Id"
+                    },
+                    "label": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Label"
+                    }
+                },
+                "type": "object",
+                "title": "AddressInput",
+                "description": "Endereço — usado tanto no partner principal quanto em entregas filhas."
+            },
+            "AddressOutput": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Type"
+                    },
+                    "street": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Street"
+                    },
+                    "street2": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Street2"
+                    },
+                    "city": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "City"
+                    },
+                    "zip": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Zip"
+                    },
+                    "state_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "country_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "is_default": {
+                        "type": "boolean",
+                        "title": "Is Default",
+                        "default": false
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "title": "Active",
+                        "default": true
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "type"
+                ],
+                "title": "AddressOutput"
+            },
+            "AddressUpdateInput": {
+                "properties": {
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "street": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Street"
+                    },
+                    "street2": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Street2"
+                    },
+                    "city": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "City"
+                    },
+                    "zip": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Zip"
+                    },
+                    "state_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "State Id"
+                    },
+                    "country_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Country Id"
+                    },
+                    "is_default": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Is Default"
+                    }
+                },
+                "type": "object",
+                "title": "AddressUpdateInput",
+                "description": "Update parcial de endereço — só os campos enviados são alterados.\nAceita também `is_default` para promover este endereço a padrão."
+            },
+            "AttributeLineInfo": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "attribute_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "display_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Display Type"
+                    },
+                    "values": {
+                        "items": {
+                            "$ref": "#/components/schemas/AttributeValueInfo"
+                        },
+                        "type": "array",
+                        "title": "Values",
+                        "default": []
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "title": "AttributeLineInfo"
+            },
+            "AttributeValueInfo": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "price_extra": {
+                        "type": "number",
+                        "title": "Price Extra",
+                        "default": 0.0
+                    },
+                    "attribute_value_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "title": "AttributeValueInfo"
+            },
+            "CheckoutInput": {
+                "properties": {
+                    "paid": {
+                        "type": "boolean",
+                        "title": "Paid"
+                    },
+                    "delivery_code": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Delivery Code"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "paid"
+                ],
+                "title": "CheckoutInput"
+            },
+            "CheckoutOutput": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "state": {
+                        "type": "string",
+                        "title": "State"
+                    },
+                    "amount_total": {
+                        "type": "number",
+                        "title": "Amount Total",
+                        "default": 0.0
+                    },
+                    "amount_paid": {
+                        "type": "number",
+                        "title": "Amount Paid",
+                        "default": 0.0
+                    },
+                    "delivery_code": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Delivery Code"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "state"
+                ],
+                "title": "CheckoutOutput"
+            },
+            "ComboComponentOutput": {
+                "properties": {
+                    "combo_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "combo_item_id": {
+                        "type": "integer",
+                        "title": "Combo Item Id"
+                    },
+                    "product_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "extra_price": {
+                        "type": "number",
+                        "title": "Extra Price",
+                        "default": 0.0
+                    },
+                    "selected_attributes": {
+                        "items": {
+                            "$ref": "#/components/schemas/SelectedAttributeOutput"
+                        },
+                        "type": "array",
+                        "title": "Selected Attributes",
+                        "default": []
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "combo_item_id"
+                ],
+                "title": "ComboComponentOutput"
+            },
+            "ComboInfo": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "qty_max": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Qty Max"
+                    },
+                    "qty_free": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Qty Free"
+                    },
+                    "base_price": {
+                        "type": "number",
+                        "title": "Base Price",
+                        "default": 0.0
+                    },
+                    "combo_item_ids": {
+                        "items": {
+                            "$ref": "#/components/schemas/ComboItemInfo"
+                        },
+                        "type": "array",
+                        "title": "Combo Item Ids",
+                        "default": []
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "title": "ComboInfo"
+            },
+            "ComboItemInfo": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "product_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "extra_price": {
+                        "type": "number",
+                        "title": "Extra Price",
+                        "default": 0.0
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "title": "ComboItemInfo"
+            },
+            "ComboSelectionInput": {
+                "properties": {
+                    "combo_item_id": {
+                        "type": "integer",
+                        "title": "Combo Item Id"
+                    },
+                    "attribute_value_ids": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array",
+                        "title": "Attribute Value Ids",
+                        "default": []
+                    },
+                    "combo_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Combo Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "combo_item_id"
+                ],
+                "title": "ComboSelectionInput"
+            },
+            "CompanyInfo": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "title": "CompanyInfo",
+                "description": "Representação leve de qualquer many2one (id + display name)."
+            },
+            "CustomerInput": {
+                "properties": {
+                    "phone": {
+                        "type": "string",
+                        "title": "Phone"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "mobile": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Mobile"
+                    },
+                    "email": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email"
+                    },
+                    "company_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Company Id"
+                    },
+                    "address": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AddressInput"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "phone",
+                    "name"
+                ],
+                "title": "CustomerInput"
+            },
+            "CustomerOutput": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "phone": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Phone"
+                    },
+                    "email": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email"
+                    },
+                    "company_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "street": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Street"
+                    },
+                    "street2": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Street2"
+                    },
+                    "city": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "City"
+                    },
+                    "zip": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Zip"
+                    },
+                    "state_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "country_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "delivery_addresses": {
+                        "items": {
+                            "$ref": "#/components/schemas/AddressOutput"
+                        },
+                        "type": "array",
+                        "title": "Delivery Addresses",
+                        "default": []
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "title": "Active",
+                        "default": true
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "title": "CustomerOutput"
+            },
+            "CustomerUpdateInput": {
+                "properties": {
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "phone": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Phone"
+                    },
+                    "email": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Email"
+                    },
+                    "mobile": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Mobile"
+                    }
+                },
+                "type": "object",
+                "title": "CustomerUpdateInput",
+                "description": "Update parcial — só os campos enviados são alterados."
+            },
+            "DeliveryAddressInput": {
+                "properties": {
+                    "id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Id"
+                    },
+                    "new": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AddressInput"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "add_new_address": {
+                        "type": "boolean",
+                        "title": "Add New Address",
+                        "default": false
+                    },
+                    "set_as_default": {
+                        "type": "boolean",
+                        "title": "Set As Default",
+                        "default": false
+                    }
+                },
+                "type": "object",
+                "title": "DeliveryAddressInput",
+                "description": "Resolução de endereço de entrega.\n\n- id: usa endereço já cadastrado (deve ser filho do partner, type='delivery')\n- new + add_new_address=True: cria um novo filho do partner\n- vazio: nenhum endereço de entrega"
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError"
+            },
+            "OrderCreateInput": {
+                "properties": {
+                    "pos_config_id": {
+                        "type": "integer",
+                        "title": "Pos Config Id"
+                    },
+                    "order_type": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "dine_in",
+                                    "takeaway",
+                                    "delivery"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Order Type"
+                    },
+                    "pricelist_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pricelist Id"
+                    },
+                    "fiscal_position_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Fiscal Position Id"
+                    },
+                    "partner_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Partner Id"
+                    },
+                    "customer": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CustomerInput"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "delivery_address": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/DeliveryAddressInput"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "table_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Table Id"
+                    },
+                    "note": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Note"
+                    },
+                    "source": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Source"
+                    },
+                    "external_ref": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "External Ref"
+                    },
+                    "lines": {
+                        "items": {
+                            "$ref": "#/components/schemas/OrderLineCreateInput"
+                        },
+                        "type": "array",
+                        "title": "Lines"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "pos_config_id",
+                    "lines"
+                ],
+                "title": "OrderCreateInput"
+            },
+            "OrderLineCreateInput": {
+                "properties": {
+                    "product_id": {
+                        "type": "integer",
+                        "title": "Product Id"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "title": "Quantity",
+                        "default": 1.0
+                    },
+                    "attribute_value_ids": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array",
+                        "title": "Attribute Value Ids",
+                        "default": []
+                    },
+                    "combo_selections": {
+                        "items": {
+                            "$ref": "#/components/schemas/ComboSelectionInput"
+                        },
+                        "type": "array",
+                        "title": "Combo Selections",
+                        "default": []
+                    },
+                    "note": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Note"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "product_id"
+                ],
+                "title": "OrderLineCreateInput"
+            },
+            "OrderLineInput": {
+                "properties": {
+                    "product_id": {
+                        "type": "integer",
+                        "title": "Product Id"
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "title": "Quantity",
+                        "default": 1.0
+                    },
+                    "attribute_value_ids": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array",
+                        "title": "Attribute Value Ids",
+                        "default": []
+                    },
+                    "combo_selections": {
+                        "items": {
+                            "$ref": "#/components/schemas/ComboSelectionInput"
+                        },
+                        "type": "array",
+                        "title": "Combo Selections",
+                        "default": []
+                    },
+                    "note": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Note"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "product_id"
+                ],
+                "title": "OrderLineInput"
+            },
+            "OrderLineOutput": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "product_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "qty": {
+                        "type": "number",
+                        "title": "Qty"
+                    },
+                    "price_unit": {
+                        "type": "number",
+                        "title": "Price Unit"
+                    },
+                    "price_subtotal": {
+                        "type": "number",
+                        "title": "Price Subtotal"
+                    },
+                    "price_subtotal_incl": {
+                        "type": "number",
+                        "title": "Price Subtotal Incl"
+                    },
+                    "note": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Note"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "qty",
+                    "price_unit",
+                    "price_subtotal",
+                    "price_subtotal_incl"
+                ],
+                "title": "OrderLineOutput"
+            },
+            "OrderOutput": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "state": {
+                        "type": "string",
+                        "title": "State"
+                    },
+                    "pos_config_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "session_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "partner_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "delivery_partner_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "table_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "preset_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "order_type": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "dine_in",
+                                    "takeaway",
+                                    "delivery"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Order Type"
+                    },
+                    "amount_total": {
+                        "type": "number",
+                        "title": "Amount Total",
+                        "default": 0.0
+                    },
+                    "amount_tax": {
+                        "type": "number",
+                        "title": "Amount Tax",
+                        "default": 0.0
+                    },
+                    "amount_paid": {
+                        "type": "number",
+                        "title": "Amount Paid",
+                        "default": 0.0
+                    },
+                    "source": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Source"
+                    },
+                    "external_ref": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "External Ref"
+                    },
+                    "received_at": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Received At"
+                    },
+                    "rejection_reason": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Rejection Reason"
+                    },
+                    "delivery_code": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Delivery Code"
+                    },
+                    "lines": {
+                        "items": {
+                            "$ref": "#/components/schemas/OrderLineOutput"
+                        },
+                        "type": "array",
+                        "title": "Lines",
+                        "default": []
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "state"
+                ],
+                "title": "OrderOutput"
+            },
+            "PosConfigDetail": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "company_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "title": "Active"
+                    },
+                    "self_ordering_mode": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Self Ordering Mode"
+                    },
+                    "default_order_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Default Order Type"
+                    },
+                    "available_order_types": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Available Order Types",
+                        "default": []
+                    },
+                    "available_presets": {
+                        "items": {
+                            "$ref": "#/components/schemas/PosPresetInfo"
+                        },
+                        "type": "array",
+                        "title": "Available Presets",
+                        "default": []
+                    },
+                    "current_session_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Current Session Id"
+                    },
+                    "current_session_state": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Current Session State"
+                    },
+                    "can_receive_orders": {
+                        "type": "boolean",
+                        "title": "Can Receive Orders",
+                        "default": false
+                    },
+                    "currency_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "pricelist_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "picking_type_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "module_pos_restaurant": {
+                        "type": "boolean",
+                        "title": "Module Pos Restaurant",
+                        "default": false
+                    },
+                    "limit_categories": {
+                        "type": "boolean",
+                        "title": "Limit Categories",
+                        "default": false
+                    },
+                    "iface_available_categ_ids": {
+                        "items": {
+                            "$ref": "#/components/schemas/CompanyInfo"
+                        },
+                        "type": "array",
+                        "title": "Iface Available Categ Ids",
+                        "default": []
+                    },
+                    "iface_print_via_proxy": {
+                        "type": "boolean",
+                        "title": "Iface Print Via Proxy",
+                        "default": false
+                    },
+                    "iface_cashdrawer": {
+                        "type": "boolean",
+                        "title": "Iface Cashdrawer",
+                        "default": false
+                    },
+                    "receipt_header": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Receipt Header"
+                    },
+                    "receipt_footer": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Receipt Footer"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "active"
+                ],
+                "title": "PosConfigDetail"
+            },
+            "PosConfigSummary": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "company_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "title": "Active"
+                    },
+                    "self_ordering_mode": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Self Ordering Mode"
+                    },
+                    "default_order_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Default Order Type"
+                    },
+                    "available_order_types": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Available Order Types",
+                        "default": []
+                    },
+                    "available_presets": {
+                        "items": {
+                            "$ref": "#/components/schemas/PosPresetInfo"
+                        },
+                        "type": "array",
+                        "title": "Available Presets",
+                        "default": []
+                    },
+                    "current_session_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Current Session Id"
+                    },
+                    "current_session_state": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Current Session State"
+                    },
+                    "can_receive_orders": {
+                        "type": "boolean",
+                        "title": "Can Receive Orders",
+                        "default": false
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "active"
+                ],
+                "title": "PosConfigSummary"
+            },
+            "PosPresetInfo": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "order_type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Order Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "title": "PosPresetInfo"
+            },
+            "ProductDetail": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "default_code": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Default Code"
+                    },
+                    "barcode": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Barcode"
+                    },
+                    "list_price": {
+                        "type": "number",
+                        "title": "List Price"
+                    },
+                    "available_in_pos": {
+                        "type": "boolean",
+                        "title": "Available In Pos"
+                    },
+                    "categ_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "image_url": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Image Url"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "description_sale": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description Sale"
+                    },
+                    "standard_price": {
+                        "type": "number",
+                        "title": "Standard Price"
+                    },
+                    "qty_available": {
+                        "type": "number",
+                        "title": "Qty Available"
+                    },
+                    "uom_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "pos_categ_ids": {
+                        "items": {
+                            "$ref": "#/components/schemas/CompanyInfo"
+                        },
+                        "type": "array",
+                        "title": "Pos Categ Ids",
+                        "default": []
+                    },
+                    "company_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "taxes_id": {
+                        "items": {
+                            "$ref": "#/components/schemas/CompanyInfo"
+                        },
+                        "type": "array",
+                        "title": "Taxes Id",
+                        "default": []
+                    },
+                    "active": {
+                        "type": "boolean",
+                        "title": "Active"
+                    },
+                    "type": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Type"
+                    },
+                    "combo_ids": {
+                        "items": {
+                            "$ref": "#/components/schemas/ComboInfo"
+                        },
+                        "type": "array",
+                        "title": "Combo Ids",
+                        "default": []
+                    },
+                    "attribute_line_ids": {
+                        "items": {
+                            "$ref": "#/components/schemas/AttributeLineInfo"
+                        },
+                        "type": "array",
+                        "title": "Attribute Line Ids",
+                        "default": []
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "list_price",
+                    "available_in_pos",
+                    "standard_price",
+                    "qty_available",
+                    "active"
+                ],
+                "title": "ProductDetail"
+            },
+            "ProductSummary": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "default_code": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Default Code"
+                    },
+                    "barcode": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Barcode"
+                    },
+                    "list_price": {
+                        "type": "number",
+                        "title": "List Price"
+                    },
+                    "available_in_pos": {
+                        "type": "boolean",
+                        "title": "Available In Pos"
+                    },
+                    "categ_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "image_url": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Image Url"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "list_price",
+                    "available_in_pos"
+                ],
+                "title": "ProductSummary"
+            },
+            "QuoteInput": {
+                "properties": {
+                    "pos_config_id": {
+                        "type": "integer",
+                        "title": "Pos Config Id"
+                    },
+                    "pricelist_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Pricelist Id"
+                    },
+                    "fiscal_position_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Fiscal Position Id"
+                    },
+                    "partner_id": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Partner Id"
+                    },
+                    "lines": {
+                        "items": {
+                            "$ref": "#/components/schemas/OrderLineInput"
+                        },
+                        "type": "array",
+                        "title": "Lines"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "pos_config_id",
+                    "lines"
+                ],
+                "title": "QuoteInput"
+            },
+            "QuoteLineOutput": {
+                "properties": {
+                    "product_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "quantity": {
+                        "type": "number",
+                        "title": "Quantity"
+                    },
+                    "unit_price_base": {
+                        "type": "number",
+                        "title": "Unit Price Base"
+                    },
+                    "price_extras": {
+                        "type": "number",
+                        "title": "Price Extras",
+                        "default": 0.0
+                    },
+                    "unit_price": {
+                        "type": "number",
+                        "title": "Unit Price"
+                    },
+                    "subtotal_untaxed": {
+                        "type": "number",
+                        "title": "Subtotal Untaxed"
+                    },
+                    "subtotal_taxed": {
+                        "type": "number",
+                        "title": "Subtotal Taxed"
+                    },
+                    "taxes": {
+                        "items": {
+                            "$ref": "#/components/schemas/TaxBreakdown"
+                        },
+                        "type": "array",
+                        "title": "Taxes",
+                        "default": []
+                    },
+                    "selected_attributes": {
+                        "items": {
+                            "$ref": "#/components/schemas/SelectedAttributeOutput"
+                        },
+                        "type": "array",
+                        "title": "Selected Attributes",
+                        "default": []
+                    },
+                    "combo_components": {
+                        "items": {
+                            "$ref": "#/components/schemas/ComboComponentOutput"
+                        },
+                        "type": "array",
+                        "title": "Combo Components",
+                        "default": []
+                    },
+                    "note": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Note"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "quantity",
+                    "unit_price_base",
+                    "unit_price",
+                    "subtotal_untaxed",
+                    "subtotal_taxed"
+                ],
+                "title": "QuoteLineOutput"
+            },
+            "QuoteOutput": {
+                "properties": {
+                    "pos_config_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "currency_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "pricelist_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "partner_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "lines": {
+                        "items": {
+                            "$ref": "#/components/schemas/QuoteLineOutput"
+                        },
+                        "type": "array",
+                        "title": "Lines",
+                        "default": []
+                    },
+                    "amount_untaxed": {
+                        "type": "number",
+                        "title": "Amount Untaxed",
+                        "default": 0.0
+                    },
+                    "amount_tax": {
+                        "type": "number",
+                        "title": "Amount Tax",
+                        "default": 0.0
+                    },
+                    "amount_total": {
+                        "type": "number",
+                        "title": "Amount Total",
+                        "default": 0.0
+                    }
+                },
+                "type": "object",
+                "title": "QuoteOutput"
+            },
+            "RejectInput": {
+                "properties": {
+                    "reason": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Reason"
+                    }
+                },
+                "type": "object",
+                "title": "RejectInput"
+            },
+            "SelectedAttributeOutput": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "price_extra": {
+                        "type": "number",
+                        "title": "Price Extra",
+                        "default": 0.0
+                    },
+                    "attribute_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name"
+                ],
+                "title": "SelectedAttributeOutput"
+            },
+            "TaxBreakdown": {
+                "properties": {
+                    "tax_id": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CompanyInfo"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "amount": {
+                        "type": "number",
+                        "title": "Amount",
+                        "default": 0.0
+                    },
+                    "base": {
+                        "type": "number",
+                        "title": "Base",
+                        "default": 0.0
+                    }
+                },
+                "type": "object",
+                "title": "TaxBreakdown"
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    },
+                    "input": {
+                        "title": "Input"
+                    },
+                    "ctx": {
+                        "type": "object",
+                        "title": "Context"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError"
+            }
+        },
+        "securitySchemes": {
+            "HTTPBearer": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "servers": [
+        {
+            "url": "/lym/pos"
+        }
+    ]
+}

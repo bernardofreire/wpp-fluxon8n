@@ -1,2 +1,5 @@
 # Dados locais das planilhas (podem ser regenerados com sync-sheets.sh)
 sheets-data/
+
+# Contexto local com credenciais (nao versionar)
+prompt.md

@@ -1,0 +1,350 @@
+{
+  "name": "WPP FLOW - Restaurante",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "flow_endpoint_CLIENTE",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        32288,
+        10816
+      ],
+      "id": "7a394d68-43e7-4b59-a3d7-98d35f94307a",
+      "name": "Flow Endpoint",
+      "webhookId": "fe000000-0000-4000-b000-000000000000",
+      "notes": "Endpoint do WhatsApp Flow (Meta envia requests criptografadas: ping, INIT, data_exchange). PATH UNICO POR CLIENTE."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "flow-pk-1",
+              "name": "flow_private_key",
+              "value": "COLE_A_CHAVE_PRIVADA_RSA_AQUI",
+              "type": "string"
+            },
+            {
+              "id": "flow-sb-url",
+              "name": "supabase_url",
+              "value": "COLE_A_URL_SUPABASE_AQUI",
+              "type": "string"
+            },
+            {
+              "id": "flow-sb-key",
+              "name": "supabase_key",
+              "value": "COLE_A_SERVICE_ROLE_KEY_AQUI",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        32624,
+        10816
+      ],
+      "id": "9d6e98b4-45c8-43e2-a5e4-e4bb08858d74",
+      "name": "Flow Config",
+      "notes": "Chave privada RSA (PEM). Copiar conteudo do flow_private_key.pem."
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\n\nconst flowConfig = $('Flow Config').first().json;\nconst body = $('Flow Endpoint').first().json.body;\n\n// --- Private Key ---\nlet rawKey = flowConfig.flow_private_key;\nrawKey = rawKey.replace(/^[\"']|[\"']$/g, '');\nrawKey = rawKey.replace(/\\\\n/g, '\\n');\nrawKey = rawKey.replace(/\\\\r/g, '');\n\nlet keyType = 'PRIVATE KEY';\nif (rawKey.includes('RSA PRIVATE KEY')) {\n  keyType = 'RSA PRIVATE KEY';\n}\n\nconst base64Body = rawKey\n  .replace(/-----[A-Z ]+-----/g, '')\n  .replace(/\\s/g, '');\n\nconst cleanPem = [\n  '-----BEGIN ' + keyType + '-----',\n  ...base64Body.match(/.{1,64}/g),\n  '-----END ' + keyType + '-----',\n  ''\n].join('\\n');\n\nconst keyObj = crypto.createPrivateKey(cleanPem);\nconst privateKeyPem = keyObj.export({ type: 'pkcs1', format: 'pem' });\n\n// --- Decrypt ---\nconst encryptedAesKey = Buffer.from(body.encrypted_aes_key, 'base64');\nconst encryptedFlowData = Buffer.from(body.encrypted_flow_data, 'base64');\nconst initialVectorBuffer = Buffer.from(body.initial_vector, 'base64');\n\nconst aesKey = crypto.privateDecrypt(\n  { key: privateKeyPem, padding: crypto.constants.RSA_PKCS1_OAEP_PADDING, oaepHash: 'sha256' },\n  encryptedAesKey\n);\n\nconst TAG_LENGTH = 16;\nconst decipher = crypto.createDecipheriv('aes-128-gcm', aesKey, initialVectorBuffer);\ndecipher.setAuthTag(encryptedFlowData.subarray(-TAG_LENGTH));\nconst decrypted = Buffer.concat([\n  decipher.update(encryptedFlowData.subarray(0, -TAG_LENGTH)),\n  decipher.final()\n]).toString('utf-8');\nconst request = JSON.parse(decrypted);\n\nreturn [{\n  json: {\n    action: request.action,\n    version: request.version || '3.0',\n    data: request.data || {},\n    flow_token: request.data?.flow_token || '',\n    screen: request.screen || '',\n    aesKeyBuffer: { data: Array.from(aesKey) },\n    ivBuffer: { data: Array.from(initialVectorBuffer) }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32928,
+        10816
+      ],
+      "id": "f88ad7eb-2abf-4648-906e-67f5858abe99",
+      "name": "Decryption",
+      "notes": "Descriptografa request do Meta. Exporta action, data, aesKeyBuffer, ivBuffer para os proximos nos."
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "action-ping",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "ping",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ping"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "action-init",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "INIT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "INIT"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "action-data-exchange",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "data_exchange",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "data_exchange"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "fallback"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        33248,
+        10784
+      ],
+      "id": "c90cc916-1f9d-42bf-969a-20720d581270",
+      "name": "Action Switch",
+      "notes": "Roteia por action: ping, INIT, data_exchange."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ping-resp-1",
+              "name": "response_to_send",
+              "value": "={{ { version: '3.0', data: { status: 'active' } } }}",
+              "type": "object"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        33648,
+        10640
+      ],
+      "id": "e2a10600-68dc-47f4-ac1b-90c49d7cc34b",
+      "name": "Ping Response",
+      "notes": "Resposta para ping e INIT: { status: 'active' }."
+    },
+    {
+      "parameters": {
+        "jsCode": "const decrypted = $('Decryption').first().json;\nconst formData = decrypted.data || {};\nconst screen = decrypted.screen || '';\n\n// TODO: Conectar com Odoo para buscar dados dinamicos\n// Por enquanto, retorna resposta basica para qualquer data_exchange\n\nconst responseData = {\n  version: '3.0',\n  data: {\n    status: 'active'\n  }\n};\n\nreturn [{\n  json: {\n    response_to_send: responseData\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        33648,
+        10944
+      ],
+      "id": "15ecb14e-9f96-430d-b262-9e2f8cb5f467",
+      "name": "Data Exchange Handler",
+      "notes": "Processa data_exchange: recebe dados do usuario (endereco, itens, pagamento) e monta resposta. TODO: conectar Odoo."
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require(\"crypto\");\n\nconst responsePayload = $input.first().json.response_to_send;\n\nconst aesKeyBuffer = Buffer.from($('Decryption').first().json.aesKeyBuffer.data);\nconst ivBuffer = Buffer.from($('Decryption').first().json.ivBuffer.data);\n\nconst flippedIV = Buffer.from(ivBuffer.map(b => ~b));\n\nconst cipher = crypto.createCipheriv(\"aes-128-gcm\", aesKeyBuffer, flippedIV);\n\nconst encryptedResponse = Buffer.concat([\n  cipher.update(JSON.stringify(responsePayload), \"utf-8\"),\n  cipher.final(),\n  cipher.getAuthTag(),\n]);\n\nreturn [{\n  json: {\n    response: encryptedResponse.toString(\"base64\"),\n  },\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        34048,
+        10784
+      ],
+      "id": "8175b3d4-907b-4ef2-9191-31c1ccda3a2a",
+      "name": "Encryption",
+      "notes": "Criptografa a resposta usando AES-GCM com IV invertido. Retorna base64."
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.response }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        34448,
+        10784
+      ],
+      "id": "a5e1fbd7-ed26-4192-8b1a-3baf2c1fea7d",
+      "name": "Flow Response",
+      "notes": "Retorna string base64 criptografada para o Meta. Content-Type: text/plain."
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Flow Endpoint": {
+      "main": [
+        [
+          {
+            "node": "Flow Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Flow Config": {
+      "main": [
+        [
+          {
+            "node": "Decryption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decryption": {
+      "main": [
+        [
+          {
+            "node": "Action Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Action Switch": {
+      "main": [
+        [
+          {
+            "node": "Ping Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ping Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Data Exchange Handler",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ping Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ping Response": {
+      "main": [
+        [
+          {
+            "node": "Encryption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Exchange Handler": {
+      "main": [
+        [
+          {
+            "node": "Encryption",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Encryption": {
+      "main": [
+        [
+          {
+            "node": "Flow Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "37b39bd9-b36d-41c4-ba18-d9fb42b866e1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bf9c0705358f3424eb1d41219c56e9c5f5a259e2443c6a07b72a86e802497145"
+  },
+  "id": "OZibyqSQvU1MttX4",
+  "tags": []
+}
